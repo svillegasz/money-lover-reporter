@@ -1,96 +1,84 @@
-import os
-import time
-import requests
-import base64
-from pydash import map_, get, gt
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from bs4 import BeautifulSoup
+
+from pydash import get, gt, lines, nth, last, has_substr, lower_case, trim
+import traceback
+import moneylover
+import gmail
+import re
 
 DAVIVIENDA_EMAIL = 'BANCO_DAVIVIENDA@davivienda.com'
 SCOTIABANK_EMAIL = 'colpatriaInforma@colpatria.com'
 PSE_EMAIL = 'serviciopse@achcolombia.com.co'
-GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1'
 
-def get_oauth_token():
-    global TOKEN
-    # driver = webdriver.Firefox()
-    driver = webdriver.Remote(
-        command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'chrome'})
-    wait = WebDriverWait(driver, 10)
+def process_davivienda_message(message):
+    print('processing davivienda message')
+    amount = re.sub(r'[^\d.]', '', nth(lines(message.string), 6))
+    category_type = nth(lines(message.string), 7)
+    if has_substr(lower_case(category_type), 'deposito') or has_substr(lower_case(category_type), 'abono'):
+        category_type = moneylover.CATEGORY_TYPE['income']
+        category_item = 'Award' # TO DO: Define category item
+    else:
+        category_type = moneylover.CATEGORY_TYPE['expense']
+        category_item = 'Bills & Utilities' # TO DO: Define category item
+    desc = trim(nth(lines(message.string), 8))
+    return amount, {'type': category_type, 'item': category_item}, desc
 
-    driver.get('https://developers.google.com/oauthplayground/')
-    time.sleep(3)
-    driver.find_element_by_id('scopes').send_keys('https://www.googleapis.com/auth/gmail.readonly')
-    driver.find_element_by_id('authorizeApisButton').click()
-    time.sleep(3)
-    driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
-    driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
-    time.sleep(3)
-    driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
-    driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
-    time.sleep(2)
-    driver.find_element_by_css_selector('[data-primary-action-label="Allow"]>div>div:first-child button').click()
-    time.sleep(5)
-    driver.find_element_by_id('exchangeCode').click()
-    wait.until(lambda d: d.find_element_by_id('access_token_field').get_attribute('value'))
-    TOKEN = driver.find_element_by_id('access_token_field').get_attribute('value')
-    driver.close()
+def process_scotiabank_message(message):
+    desc = nth(message.table.find_all('p'), 2).string
+    amount = re.sub(r'[^\d.]', '', nth(message.table.find_all('p'), 3).string)
+    return amount, {'type': 'EXPENSE', 'item': 'Bills & Utilities'}, desc
 
-def decode_base64(data, altchars=b'+/'):
-    """Decode base64, padding being optional.
-
-    :param data: Base64 data as an ASCII byte string
-    :returns: The decoded byte string.
-
-    """
-    data = re.sub(rb'[^a-zA-Z0-9%s]+' % altchars, b'', data)  # normalize
-    missing_padding = len(data) % 4
-    if missing_padding:
-        data += b'='* (4 - missing_padding)
-    return base64.b64decode(data, altchars)
-
-def get_gmail_messages(sender, exclude = None):
-    headers = {'Authorization': 'Bearer {token}'.format(token=TOKEN)}
-    query = 'from:{sender} newer_than:2d in:inbox transacción {exclude}'.format(sender=sender, exclude='-' + exclude if exclude else '')
-    params = {'q': query}
-    json = requests.get('{url}/users/me/messages'.format(url=GMAIL_API_URL), headers=headers, params=params).json()
-    if gt(get(json, 'resultSizeEstimate'), 0):
-        return map_(get(json, 'messages'), 'id')
-
-def get_gmail_message(msg_id):
-    headers = {'Authorization': 'Bearer {token}'.format(token=TOKEN)}
-    json = requests.get('{url}/users/me/messages/{id}'.format(url=GMAIL_API_URL, id=msg_id), headers=headers).json()
-    content = get(json, 'payload.body.data')
-    html = base64.urlsafe_b64decode(content).decode('utf-8')
-    message = BeautifulSoup(html, 'html.parser')
-    return message
+def process_pse_message(message):
+    data = lines(last(message.table.table.find_all('span')))
+    desc = re.sub(r'<[^<>]*>', '', nth(data))
+    amount = re.sub(r'[^\d.]', '', nth(data, 2))
+    is_visa = has_substr(lower_case(desc), 'credito visa')
+    if is_visa:
+        visa_category_type = moneylover.CATEGORY_TYPE['income']
+        visa_category_item = 'Award' # TO DO: Define category item
+    category_type = moneylover.CATEGORY_TYPE['expense']
+    category_item = 'Bills & Utilities' # TO DO: Define category item
+    return amount, {'type': category_type, 'item': category_item}, desc, {'type': visa_category_type, 'item': visa_category_item} if is_visa else None
 
 def update_davivienda_wallet(messages):
     if not messages: return
+    print('General: Updating davivienda wallet process started')
     for msg_id in messages:
-        message = get_gmail_message(msg_id)
+        message = gmail.get_message(msg_id)
+        amount, category, desc = process_davivienda_message(message)
+        moneylover.add_transaction('DAVIVIENDA', amount, category, desc)
+    print('General: Updating davivienda wallet process finished')
 
 def update_scotiabank_wallet(messages):
     if not messages: return
+    print('General: Updating scotiabank wallet process started')
     for msg_id in messages:
-        message = get_gmail_message(msg_id)
-        comercio = message.table.find_all('p')[2].string # TO DO: parsear a categoria
-        monto = message.table.find_all('p')[3].string # TO DO: convertir a número
+        message = gmail.get_message(msg_id)
+        amount, category, desc = process_scotiabank_message(message)
+        moneylover.add_transaction('VISA', amount, category, desc)
+    print('General: Updating scotiabank wallet process finished')
 
 def update_pse_wallet(messages):
     if not messages: return
+    print('General: Updating davivienda(pse) wallet process started')
     for msg_id in messages:
-        message = get_gmail_message(msg_id)
-        print(message.table.table.find_all('span')[-1]) # TO DO: parse span to values
+        message = gmail.get_message(msg_id)
+        amount, category, desc, visa_category = process_pse_message(message)
+        moneylover.add_transaction('DAVIVIENDA', amount, category, desc)
+        if visa_category:
+            moneylover.add_transaction('VISA', amount, visa_category, desc)
+    print('General: Updating davivienda(pse) wallet process started')
 
 if __name__ == '__main__':
-    get_oauth_token()
-    davivienda_messages = get_gmail_messages(DAVIVIENDA_EMAIL, exclude='PSE')
-    update_davivienda_wallet(davivienda_messages)
-    scotiabank_messages = get_gmail_messages(SCOTIABANK_EMAIL)
-    update_scotiabank_wallet(scotiabank_messages)
-    pse_messages = get_gmail_messages(PSE_EMAIL)
-    update_pse_wallet(pse_messages)
+    gmail.get_oauth_token()
+    davivienda_messages = gmail.get_messages(DAVIVIENDA_EMAIL)
+    scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
+    pse_messages = gmail.get_messages(PSE_EMAIL)
+
+    moneylover.login()
+    try:
+        update_davivienda_wallet(davivienda_messages)
+        update_scotiabank_wallet(scotiabank_messages)
+        update_pse_wallet(pse_messages)
+    except:
+        traceback.print_exc()
+    moneylover.sign_out()
