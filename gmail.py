@@ -30,7 +30,6 @@ def get_oauth_token():
     time.sleep(3)
     print('Gmail: Setting credentials')
     driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
-    print('Gmail usar {user}'.format(user=os.getenv('GOOGLE_USER')))
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
