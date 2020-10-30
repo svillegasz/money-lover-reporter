@@ -19,7 +19,7 @@ def get_oauth_token():
     print('Gmail: Starting selenium session')
     driver = webdriver.Remote(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'google'})
+        desired_capabilities={'browserName': 'chrome'})
     wait = WebDriverWait(driver, 10)
 
     print('Gmail: Starting authentication process')

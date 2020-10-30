@@ -27,7 +27,7 @@ def login():
     print('Money lover: Starting selenium session')
     driver = webdriver.Remote(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'google'})
+        desired_capabilities={'browserName': 'chrome'})
     wait = WebDriverWait(driver, 10)
     print('Money lover: Starting login process')
     driver.get(URL)
