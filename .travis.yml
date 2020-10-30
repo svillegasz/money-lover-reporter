@@ -6,7 +6,7 @@ services:
 addons:
   artifacts:
     paths:
-    - $(ls /tmp/*.png | tr "\n" ":")
+    - $(git ls-files -o |grep .png | tr "\n" ":")
 before_install:
 - openssl aes-256-cbc -K $encrypted_9fac4b6c837a_key -iv $encrypted_9fac4b6c837a_iv
   -in secret.json.enc -out secret.json -d
