@@ -2,7 +2,7 @@ language: python
 python:
 - '3.8'
 services:
-  - docker
+- docker
 env:
   global:
   - GOOGLE_APPLICATION_CREDENTIALS=secret.json
