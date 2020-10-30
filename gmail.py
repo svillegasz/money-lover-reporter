@@ -2,7 +2,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from pydash import map_, get, gt
 from bs4 import BeautifulSoup
 import requests
@@ -17,9 +17,12 @@ SCOPE = 'https://www.googleapis.com/auth/gmail.readonly'
 def get_oauth_token():
     global TOKEN
     print('Gmail: Starting selenium session')
+    profile = FirefoxProfile()
+    profile.add_extension('buster_captcha_solver_for_humans-1.1.0-an+fx.xpi')
     driver = webdriver.Remote(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'chrome'})
+        desired_capabilities={'browserName': 'firefox'},
+        browser_profile=profile)
     wait = WebDriverWait(driver, 10)
 
     print('Gmail: Starting authentication process')
@@ -33,6 +36,12 @@ def get_oauth_token():
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     driver.save_screenshot('login.png')
+    try:
+        driver.find_element_by_id('solver-button').click()
+    except:
+        print('Gmail: No recaptcha nedded')
+    
+    driver.save_screenshot('login2.png')
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
     driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
     time.sleep(2)
