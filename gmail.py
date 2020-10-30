@@ -2,6 +2,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.firefox.options import Options
 from pydash import map_, get, gt
 from bs4 import BeautifulSoup
 import requests
@@ -16,10 +17,12 @@ SCOPE = 'https://www.googleapis.com/auth/gmail.readonly'
 def get_oauth_token():
     global TOKEN
     print('Gmail: Starting selenium session')
-    # driver = webdriver.Firefox()
-    driver = webdriver.Remote(
-        command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'firefox'})
+    options = Options()
+    options.add_argument('-headless')
+    driver = webdriver.Firefox(firefox_options=options)
+    # driver = webdriver.Remote(
+    #     command_executor='http://0.0.0.0:4444/wd/hub',
+    #     desired_capabilities={'browserName': 'firefox'})
     wait = WebDriverWait(driver, 10)
 
     print('Gmail: Starting authentication process')

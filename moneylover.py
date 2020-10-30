@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.options import Options
 from pydash import last, nth
 import time
 import os
@@ -24,9 +25,12 @@ def login():
     global driver
     global wait
     print('Money lover: Starting selenium session')
-    driver = webdriver.Remote(
-        command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'firefox'})
+    options = Options()
+    options.add_argument('-headless')
+    driver = webdriver.Firefox(firefox_options=options)
+    # driver = webdriver.Remote(
+    #     command_executor='http://0.0.0.0:4444/wd/hub',
+    #     desired_capabilities={'browserName': 'firefox'})
     wait = WebDriverWait(driver, 10)
     print('Money lover: Starting login process')
     driver.get(URL)

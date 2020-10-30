@@ -4,6 +4,7 @@ from googletrans import Translator
 import urllib
 import requests
 import re
+import os
 
 translator = Translator()
 
@@ -52,8 +53,8 @@ def classify(text):
 def search(text):
     print('Categorizer: searching {text} in google'.format(text=text))
     headers = {
-        "x-rapidapi-key": "",
-        "x-rapidapi-host" :""
+        "x-rapidapi-key": os.getenv('RAPID_KEY'),
+        "x-rapidapi-host" : os.getenv('RAPID_HOST')
     }
     query = {
         "q": text,
