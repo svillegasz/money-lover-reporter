@@ -19,7 +19,7 @@ def get_oauth_token():
     # driver = webdriver.Firefox()
     driver = webdriver.Remote(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'chrome'})
+        desired_capabilities={'browserName': 'firefox'})
     wait = WebDriverWait(driver, 10)
 
     print('Gmail: Starting authentication process')
@@ -47,7 +47,7 @@ def get_oauth_token():
 def get_messages(sender, exclude = None):
     print('Gmail api: getting messages for {sender}'.format(sender=sender))
     headers = {'Authorization': 'Bearer {token}'.format(token=TOKEN)}
-    query = 'from:{sender} newer_than:1d in:inbox transacción {exclude}'.format(sender=sender, exclude='-' + exclude if exclude else '')
+    query = 'from:{sender} newer_than:10d in:inbox transacción {exclude}'.format(sender=sender, exclude='-' + exclude if exclude else '')
     params = {'q': query}
     json = requests.get('{url}/users/me/messages'.format(url=GMAIL_API_URL), headers=headers, params=params).json()
     if gt(get(json, 'resultSizeEstimate'), 0):

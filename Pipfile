@@ -11,6 +11,8 @@ install = "*"
 requests = "*"
 pydash = "*"
 beautifulsoup4 = "*"
+google-cloud-language = "*"
+googletrans = "*"
 
 [requires]
 python_version = "3.8"
