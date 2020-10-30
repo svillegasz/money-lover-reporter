@@ -18,7 +18,7 @@ def get_oauth_token():
     global TOKEN
     print('Gmail: Starting selenium session')
     profile = FirefoxProfile()
-    profile.add_extension('buster_captcha_solver_for_humans-1.1.0-an+fx.xpi')
+    profile.add_extension(os.path.join(os.path.dirname(__file__), 'buster_captcha_solver_for_humans-1.1.0-an+fx.xpi'))
     driver = webdriver.Remote(
         command_executor='http://0.0.0.0:4444/wd/hub',
         desired_capabilities={'browserName': 'firefox'},
