@@ -39,6 +39,7 @@ def login():
     driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
+    driver.save_screenshot('login.png')
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
     driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
     time.sleep(10)

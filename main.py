@@ -77,10 +77,10 @@ def update_pse_wallet(messages):
     print('PSE(davivienda): Updating davivienda(pse) wallet process started')
 
 if __name__ == '__main__':
-    gmail.get_oauth_token()
-    davivienda_messages = gmail.get_messages(DAVIVIENDA_EMAIL)
-    scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
-    pse_messages = gmail.get_messages(PSE_EMAIL)
+    # gmail.get_oauth_token()
+    # davivienda_messages = gmail.get_messages(DAVIVIENDA_EMAIL)
+    # scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
+    # pse_messages = gmail.get_messages(PSE_EMAIL)
 
     moneylover.login()
     try:
