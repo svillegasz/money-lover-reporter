@@ -10,8 +10,8 @@ addons:
 before_install:
 - openssl aes-256-cbc -K $encrypted_9fac4b6c837a_key -iv $encrypted_9fac4b6c837a_iv
   -in secret.json.enc -out secret.json -d
-- docker pull selenium/standalone-firefox
-- docker run -d -p4444:4444 selenium/standalone-firefox
+- docker pull selenium/standalone-google
+- docker run -d -p4444:4444 selenium/standalone-google
 install:
 - pip install pipenv
 - pipenv install
