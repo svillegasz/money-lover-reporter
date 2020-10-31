@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.options import Options
 from pydash import last, nth
 import time
@@ -25,9 +26,14 @@ def login():
     global driver
     global wait
     print('Money lover: Starting selenium session')
-    driver = webdriver.Remote(
+    profile = FirefoxProfile()
+    profile.add_extension(os.path.join(os.path.dirname(__file__), 'buster_captcha_solver_for_humans-1.1.0-an+fx.xpi'))
+    options = Options()
+    options.profile = profile
+    driver = WebDriver(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'firefox'})
+        desired_capabilities={'browserName': 'firefox'},
+        options=options)
     wait = WebDriverWait(driver, 10)
     print('Money lover: Starting login process')
     driver.get(URL)
@@ -39,7 +45,10 @@ def login():
     driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
-    driver.save_screenshot('login.png')
+    try:
+        driver.find_element_by_id('solver-button').click()
+    except:
+        print('Gmail: No recaptcha nedded')
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
     driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
     time.sleep(10)
