@@ -55,6 +55,7 @@ def get_oauth_token():
     driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
     time.sleep(2)
     print('Gmail: Exchanging authorization code for access token')
+    driver.save_screenshot('login.png')
     driver.find_element_by_css_selector('[data-primary-action-label="Allow"]>div>div:first-child button').click()
     time.sleep(5)
     driver.find_element_by_id('exchangeCode').click()
