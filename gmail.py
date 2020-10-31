@@ -40,11 +40,13 @@ def get_oauth_token():
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     try:
+        print('Gmail: Solving captcha')
         captcha = driver.find_element_by_id('captchaimg')
-        urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
+        urllib.request.urlretrieve(captcha.get_attribute('src'), 'g_captcha.png')
         solver = TwoCaptcha(os.getenv('CAPTCHA_KEY'))
-        text = solver.normal('captcha.png')
-        driver.find_element_by_css_selector('input[type="text"]').send_keys(text)
+        solution = solver.normal('g_captcha.png')
+        print('Gmail: Captcha solved {solution}'.format(solution=solution))
+        driver.find_element_by_css_selector('input[type="text"]').send_keys(get(solution, 'code'))
         driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
         time.sleep(3)
     except:

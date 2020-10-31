@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from pydash import last, nth
+from pydash import last, nth, get
 from twocaptcha import TwoCaptcha
 import time
 import os
@@ -42,11 +42,13 @@ def login():
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     try:
+        print('Money lover: Solving captcha')
         captcha = driver.find_element_by_id('captchaimg')
-        urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
+        urllib.request.urlretrieve(captcha.get_attribute('src'), 'ml_captcha.png')
         solver = TwoCaptcha(os.getenv('CAPTCHA_KEY'))
-        text = solver.normal('captcha.png')
-        driver.find_element_by_css_selector('input[type="text"]').send_keys(text)
+        solution = solver.normal('ml_captcha.png')
+        print('Money lover: Captcha solved {solution}'.format(solution=solution))
+        driver.find_element_by_css_selector('input[type="text"]').send_keys(get(solution, 'code'))
         driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
         time.sleep(3)
     except:
