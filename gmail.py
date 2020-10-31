@@ -44,7 +44,9 @@ def get_oauth_token():
         urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
         solver = TwoCaptcha(os.getenv('CAPTCHA_KEY'))
         text = solver.normal('captcha.png')
-        print('the captcha text is {text}'.format(text=text))
+        driver.find_element_by_css_selector('input[type="text"]').send_keys(text)
+        driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
+        time.sleep(3)
     except:
         traceback.print_exc()
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
