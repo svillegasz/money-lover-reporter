@@ -7,10 +7,14 @@ from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.options import Options 
 from pydash import map_, get, gt
 from bs4 import BeautifulSoup
+from PIL import Image
 import requests
 import os
 import time
 import base64
+import urllib
+import traceback
+
 
 GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1'
 LOGIN_URL = 'https://developers.google.com/oauthplayground/'
@@ -19,14 +23,9 @@ SCOPE = 'https://www.googleapis.com/auth/gmail.readonly'
 def get_oauth_token():
     global TOKEN
     print('Gmail: Starting selenium session')
-    profile = FirefoxProfile()
-    profile.add_extension(os.path.join(os.path.dirname(__file__), 'buster_captcha_solver_for_humans-1.1.0-an+fx.xpi'))
-    options = Options()
-    options.profile = profile
     driver = WebDriver(
         command_executor='http://0.0.0.0:4444/wd/hub',
-        desired_capabilities={'browserName': 'firefox'},
-        options=options)
+        desired_capabilities={'browserName': 'firefox'})
     wait = WebDriverWait(driver, 10)
 
     print('Gmail: Starting authentication process')
@@ -40,11 +39,11 @@ def get_oauth_token():
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     driver.save_screenshot('login.png')
-    try:
-        driver.find_element_by_id('solver-button').click()
+    try
+        captcha = driver.find_element_by_id('captchaimg')
+        urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
     except:
-        print('Gmail: No recaptcha nedded')
-        print(driver.page_source)
+        traceback.print_exc()
     
     driver.save_screenshot('login2.png')
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
