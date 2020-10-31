@@ -4,7 +4,8 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from selenium.webdriver.firefox.options import Options 
+from selenium.webdriver.firefox.options import Options
+from twocaptcha import TwoCaptcha
 from pydash import map_, get, gt
 from bs4 import BeautifulSoup
 from PIL import Image
@@ -15,6 +16,7 @@ import base64
 import urllib
 import traceback
 
+captcha_key = '7e49d2f74445dabcdd6c745a8fce8f57'
 
 GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1'
 LOGIN_URL = 'https://developers.google.com/oauthplayground/'
@@ -38,14 +40,14 @@ def get_oauth_token():
     driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
-    driver.save_screenshot('login.png')
     try:
         captcha = driver.find_element_by_id('captchaimg')
         urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
+        solver = TwoCaptcha(os.getenv('CAPTCHA_KEY'))
+        text = solver.normal('captcha.png')
+        print('the captcha text is {text}'.format(text=text))
     except:
         traceback.print_exc()
-    
-    driver.save_screenshot('login2.png')
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
     driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
     time.sleep(2)

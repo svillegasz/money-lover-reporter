@@ -13,7 +13,7 @@ pydash = "*"
 beautifulsoup4 = "*"
 google-cloud-language = "*"
 googletrans = "*"
-pillow = "*"
+2captcha-python = "*"
 
 [requires]
 python_version = "3.8"
