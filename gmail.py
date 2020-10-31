@@ -8,7 +8,6 @@ from selenium.webdriver.firefox.options import Options
 from twocaptcha import TwoCaptcha
 from pydash import map_, get, gt
 from bs4 import BeautifulSoup
-from PIL import Image
 import requests
 import os
 import time
