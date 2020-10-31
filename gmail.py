@@ -39,7 +39,7 @@ def get_oauth_token():
     driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
     time.sleep(3)
     driver.save_screenshot('login.png')
-    try
+    try:
         captcha = driver.find_element_by_id('captchaimg')
         urllib.request.urlretrieve(captcha.get_attribute('src'), 'captcha.png')
     except:
