@@ -8,6 +8,7 @@ import os
 
 translator = Translator()
 
+# Categories source https://cloud.google.com/natural-language/docs/categories
 GOOGLE_CATEGORIES = {
     'Adult': 'Entertainment',
     'Arts & Entertainment': 'Entertainment',

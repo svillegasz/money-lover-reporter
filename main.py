@@ -1,5 +1,5 @@
 
-from pydash import get, gt, lines, nth, last, has_substr, lower_case, trim, upper_case
+from pydash import get, gt, lines, nth, last, has_substr, lower_case, trim, upper_case, split
 from categorizer import categorize
 import traceback
 import moneylover
@@ -14,7 +14,7 @@ def process_davivienda_message(message):
     print('Davivienda: processing message')
     amount = re.sub(r'[^\d.]', '', nth(lines(message.string), 6))
     category_type = nth(lines(message.string), 7)
-    desc = trim(nth(lines(message.string), 8))
+    desc = trim(nth(split(nth(lines(message.string), 8), ':'), 1))
     if has_substr(upper_case(desc), 'PSE'):
         print('Davivienda: Ignored PSE payment')
         return None, None, None
@@ -28,8 +28,8 @@ def process_davivienda_message(message):
 
 def process_scotiabank_message(message):
     print('Scotiabank: processing message')
-    desc = nth(message.table.find_all('p'), 2).string
-    amount = re.sub(r'[^\d.]', '', nth(message.table.find_all('p'), 3).string)
+    desc = nth(message.table.find_all('p'), 3).string
+    amount = re.sub(r'[^\d.]', '', nth(message.table.find_all('p'), 4).string)
     category_item = categorize(desc)
     return amount, {'type': 'EXPENSE', 'item': category_item}, desc
 
@@ -77,7 +77,6 @@ def update_pse_wallet(messages):
     print('PSE(davivienda): Updating davivienda(pse) wallet process started')
 
 if __name__ == '__main__':
-    gmail.get_oauth_token()
     davivienda_messages = gmail.get_messages(DAVIVIENDA_EMAIL)
     scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
     pse_messages = gmail.get_messages(PSE_EMAIL)

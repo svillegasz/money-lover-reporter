@@ -1,10 +1,10 @@
 
 from selenium import webdriver
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from pydash import last, nth, get
-from twocaptcha import TwoCaptcha
 import time
 import os
 import urllib
@@ -22,48 +22,30 @@ CATEGORY_TYPE = {
 }
 
 URL = 'https://web.moneylover.me/'
+ML_USER = os.getenv('MONEY_LOVER_USER')
+ML_PASS = os.getenv('MONEY_LOVER_PASSWORD')
 
 def login():
     global driver
     global wait
     print('Money lover: Starting selenium session')
     driver = WebDriver(
-        command_executor='http://0.0.0.0:4444/wd/hub',
+        command_executor='http://localhost:4444/wd/hub',
         desired_capabilities={'browserName': 'firefox'})
     wait = WebDriverWait(driver, 10)
     print('Money lover: Starting login process')
     driver.get(URL)
-    wait.until(lambda d: d.find_element_by_class_name('google'))
-    driver.find_element_by_class_name('google').click()
-    time.sleep(3)
-    print('Money lover: Setting credentials in new tab')
-    driver.switch_to_window(last(driver.window_handles))
-    driver.find_element_by_xpath('//input[@type="email"]').send_keys(os.getenv('GOOGLE_USER'))
-    driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
-    time.sleep(3)
-    try:
-        print('Money lover: Solving captcha')
-        captcha = driver.find_element_by_id('captchaimg')
-        urllib.request.urlretrieve(captcha.get_attribute('src'), 'ml_captcha.png')
-        solver = TwoCaptcha(os.getenv('CAPTCHA_KEY'))
-        solution = solver.normal('ml_captcha.png')
-        print('Money lover: Captcha solved {solution}'.format(solution=solution))
-        driver.find_element_by_css_selector('input[type="text"]').send_keys(get(solution, 'code'))
-        driver.find_element_by_xpath('//*[@id="identifierNext"]').click()
-        time.sleep(3)
-    except:
-        traceback.print_exc()
-    driver.find_element_by_xpath('//input[@type="password"]').send_keys(os.getenv('GOOGLE_PASSWORD'))
-    driver.find_element_by_xpath('//*[@id="passwordNext"]').click()
+    wait.until(lambda d: d.find_element_by_id('input-26'))
+    driver.find_element_by_id('input-26').send_keys(ML_USER)
+    driver.find_element_by_id('input-28').send_keys(ML_PASS)
+    driver.find_element_by_class_name('btn-submit-ml').click()
     time.sleep(10)
     print('Money lover: login process finished: moving to main tab')
-    driver.switch_to_window(nth(driver.window_handles))
     wait.until(lambda d: d.find_element_by_id('master-container'))
 
 def sign_out():
     print('Money Lover: Starting sign out process')
     wait.until(lambda d: d.find_element_by_class_name('item-navigation').is_displayed())
-    driver.save_screenshot('ss.png')
     driver.find_element_by_class_name('item-navigation').click()
     wait.until(lambda d: d.find_element_by_class_name('screen_30').is_displayed())
     driver.find_element_by_class_name('screen_30').click()
@@ -96,14 +78,18 @@ def add_transaction(wallet, amount, category, description):
     time.sleep(1)
     wait.until(lambda d: d.find_element_by_class_name('screen_cate_1').is_displayed())
     driver.find_element_by_class_name('screen_cate_1').click()
+    driver.save_screenshot('ss1.png')
 
     print('Money lover: setting amount {amount}'.format(amount=amount))
     wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .amount input').is_displayed())
     driver.find_element_by_css_selector('.v-dialog--active .amount input').send_keys(amount)
     driver.find_element_by_css_selector('.v-dialog--active .note input').send_keys(description)
+    driver.save_screenshot('ss2.png')
 
     print('Money lover: saving transaction')
     wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .done').is_enabled())
     driver.find_element_by_css_selector('.v-dialog--active .done').click()
+    driver.save_screenshot('ss3.png')
     print('Money lover: adding transaction process finished for wallet {wallet}'.format(wallet=wallet))
     time.sleep(5)
+    driver.save_screenshot('ss4.png')

@@ -8,12 +8,10 @@ verify_ssl = true
 [packages]
 selenium = "*"
 install = "*"
-requests = "*"
 pydash = "*"
 beautifulsoup4 = "*"
 google-cloud-language = "*"
-googletrans = "*"
-2captcha-python = "*"
+googletrans = "==3.1.0a0"
 
 [requires]
 python_version = "3.8"
