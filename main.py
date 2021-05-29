@@ -37,7 +37,7 @@ def process_pse_message(message):
     print('PSE(davivienda): processing message')
     data = lines(last(message.table.table.find_all('span')))
     desc = re.sub(r'<[^<>]*>', '', nth(data))
-    amount = re.sub(r'[^\d.]', '', nth(data, 2))
+    amount = re.sub(r'[^\d,]', '', nth(data, 1)).replace(',', '.')
     is_visa = has_substr(lower_case(desc), 'credito visa')
     if is_visa:
         visa_category_type = moneylover.CATEGORY_TYPE['income']

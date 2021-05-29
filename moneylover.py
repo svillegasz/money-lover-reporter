@@ -40,7 +40,7 @@ def login():
     driver.find_element_by_id('input-28').send_keys(ML_PASS)
     driver.find_element_by_class_name('btn-submit-ml').click()
     time.sleep(10)
-    print('Money lover: login process finished: moving to main tab')
+    print('Money lover: login process finished')
     wait.until(lambda d: d.find_element_by_id('master-container'))
 
 def sign_out():
@@ -78,18 +78,14 @@ def add_transaction(wallet, amount, category, description):
     time.sleep(1)
     wait.until(lambda d: d.find_element_by_class_name('screen_cate_1').is_displayed())
     driver.find_element_by_class_name('screen_cate_1').click()
-    driver.save_screenshot('ss1.png')
 
     print('Money lover: setting amount {amount}'.format(amount=amount))
     wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .amount input').is_displayed())
     driver.find_element_by_css_selector('.v-dialog--active .amount input').send_keys(amount)
     driver.find_element_by_css_selector('.v-dialog--active .note input').send_keys(description)
-    driver.save_screenshot('ss2.png')
 
     print('Money lover: saving transaction')
     wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .done').is_enabled())
     driver.find_element_by_css_selector('.v-dialog--active .done').click()
-    driver.save_screenshot('ss3.png')
     print('Money lover: adding transaction process finished for wallet {wallet}'.format(wallet=wallet))
     time.sleep(5)
-    driver.save_screenshot('ss4.png')
