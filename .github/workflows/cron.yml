@@ -1,0 +1,33 @@
+name: Moneylover reporter
+on:
+  schedule:
+    - cron:  '0 1 * * *'
+  workflow_dispatch:
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    env:
+      MONTH: ${{secrets.MONTH}}
+      URL: ${{secrets.URL}}
+      TWILIO_ACCOUNT_SID: ${{secrets.TWILIO_ACCOUNT_SID}}
+      TWILIO_AUTH_TOKEN: ${{secrets.TWILIO_AUTH_TOKEN}}
+      FROM_NUMBER: ${{secrets.FROM_NUMBER}}
+      TO_NUMBERS: ${{secrets.TO_NUMBERS}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          architecture: 'x64'
+      - name: Start selenium standalone
+        run: |
+          docker pull selenium/standalone-chrome
+          docker run -d -p4444:4444 selenium/standalone-chrome
+          docker ps
+      - name: Install dependencies
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          poetry install
+      - name: Execute reporter
+        run: poetry run python main.py
