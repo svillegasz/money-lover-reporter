@@ -1,3 +1,3 @@
-[![Build Status](https://travis-ci.org/svillegasz/money-lover-report.svg?branch=main)](https://travis-ci.org/svillegasz/money-lover-report)
+[![Moneylover reporter](https://github.com/svillegasz/money-lover-reporter/actions/workflows/cron.yml/badge.svg)](https://github.com/svillegasz/money-lover-reporter/actions/workflows/cron.yml)
 
 # google-api-selenium-auth
