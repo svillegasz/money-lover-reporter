@@ -7,12 +7,12 @@ jobs:
   cron:
     runs-on: ubuntu-latest
     env:
-      MONTH: ${{secrets.MONTH}}
-      URL: ${{secrets.URL}}
-      TWILIO_ACCOUNT_SID: ${{secrets.TWILIO_ACCOUNT_SID}}
-      TWILIO_AUTH_TOKEN: ${{secrets.TWILIO_AUTH_TOKEN}}
-      FROM_NUMBER: ${{secrets.FROM_NUMBER}}
-      TO_NUMBERS: ${{secrets.TO_NUMBERS}}
+      GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
+      GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
+      MONEY_LOVER_PASSWORD: ${{ secrets.MONEY_LOVER_PASSWORD }}
+      MONEY_LOVER_USER: ${{ secrets.MONEY_LOVER_USER }}
+      RAPID_HOST: ${{ secrets.RAPID_HOST }}
+      RAPID_KEY: ${{ secrets.RAPID_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -20,6 +20,10 @@ jobs:
         with:
           python-version: '3.9'
           architecture: 'x64'
+      - name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
       - name: Start selenium standalone
         run: |
           docker pull selenium/standalone-chrome

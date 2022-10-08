@@ -54,15 +54,15 @@ def classify(text):
 def search(text):
     print('Categorizer: searching {text} in google'.format(text=text))
     headers = {
-        "x-rapidapi-key": os.getenv('RAPID_KEY'),
-        "x-rapidapi-host" : os.getenv('RAPID_HOST')
+        "X-RapidAPI-Key": os.getenv('RAPID_KEY'),
+        "X-RapidAPI-Host" : os.getenv('RAPID_HOST')
     }
-    query = {
-        "q": text,
-        "cr": "CO",
-        "num": 2
+    payload = {
+        "query": text,
+        "gl": "CO",
+        "pages": 2
     }
-    json = requests.get("https://rapidapi.p.rapidapi.com/api/v1/search/" + urllib.parse.urlencode(query), headers=headers).json()
+    json = requests.post("https://google-search-5.p.rapidapi.com/google/organic-search", headers=headers, data=payload).json()
     if json:
         return ' '.join(map_(get(json, 'results'), lambda result: get(result, 'description')))
 
