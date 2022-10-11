@@ -1,25 +1,8 @@
 
-from selenium import webdriver
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from selenium.webdriver.firefox.options import Options
-from pydash import map_, get, gt, split, nth
 from bs4 import BeautifulSoup
 import os
-import time
-import base64
-import urllib
-import traceback
 import imaplib
 import email
-
-captcha_key = '7e49d2f74445dabcdd6c745a8fce8f57'
-
-GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1'
-LOGIN_URL = 'https://developers.google.com/oauthplayground/'
-SCOPE = 'https://www.googleapis.com/auth/gmail.readonly'
 
 imap_host = 'imap.gmail.com'
 imap_user = os.getenv('GOOGLE_USER')
@@ -27,7 +10,6 @@ imap_pass = os.getenv('GOOGLE_PASSWORD')
 imap = imaplib.IMAP4_SSL(imap_host)
 imap.login(imap_user, imap_pass)
 imap.select('Inbox')
-
 
 def get_messages(sender, exclude = None):
     print('Gmail imap: getting messages for {sender}'.format(sender=sender))

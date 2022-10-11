@@ -1,9 +1,8 @@
 from google.cloud import language_v1
-from pydash import map_, get, concat, nth, has, has_substr, lower_case, split
+from pydash import map_, get, nth, has, has_substr, lower_case, split
 from googletrans import Translator
-import urllib
+import json
 import requests
-import re
 import os
 
 translator = Translator()
@@ -46,6 +45,7 @@ def classify(text):
         content=text, type_=language_v1.Document.Type.PLAIN_TEXT
     )
     response = language_client.classify_text(request={'document': document})
+    print(f'Categorizer: availabe categories for text -> {response}')
     category = get(nth(get(response, 'categories')), 'name')
     print('Categorizer: google cloud category -> {category}'.format(category=category))
     if category:
@@ -60,11 +60,16 @@ def search(text):
     payload = {
         "query": text,
         "gl": "CO",
+        "hl": "es_CO",
         "pages": 2
     }
-    json = requests.post("https://google-search-5.p.rapidapi.com/google/organic-search", headers=headers, data=payload).json()
-    if json:
-        return ' '.join(map_(get(json, 'results'), lambda result: get(result, 'description')))
+    response = requests.post(
+        "https://google-search-5.p.rapidapi.com/google/organic-search",
+        headers=headers,
+        data=json.dumps(payload))
+
+    if response.status_code == 200:
+        return ' '.join(map_(get(response.json(), 'data.organic'), 'snippet'))
 
 def predefined_category(text):
     if has_substr(lower_case(text), 'une'): return 'Bills & Utilities'
@@ -84,7 +89,7 @@ def categorize(text):
     if not result:
         print('Categorizer: not search results found (returned others)')
         return 'Others'
-    print('Categorizer: translating result to english -> {result}'.format(result=result))
+    print('Categorizer: translating search results to english -> {result}'.format(result=result))
     translated_result = translator.translate(result).text
     category = classify(translated_result)
     if not category or not has(GOOGLE_CATEGORIES, category):

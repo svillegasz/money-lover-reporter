@@ -7,11 +7,10 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-selenium = "^4.5.0"
 pydash = "^5.1.1"
 beautifulsoup4 = "^4.11.1"
 google-cloud-language = "^2.6.0"
-googletrans = "^3.0.0"
+googletrans = "4.0.0-rc1"
 
 [tool.poetry.dev-dependencies]
 

@@ -7,10 +7,10 @@ jobs:
   cron:
     runs-on: ubuntu-latest
     env:
-      GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
       GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
-      MONEY_LOVER_PASSWORD: ${{ secrets.MONEY_LOVER_PASSWORD }}
+      GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
       MONEY_LOVER_USER: ${{ secrets.MONEY_LOVER_USER }}
+      MONEY_LOVER_PASSWORD: ${{ secrets.MONEY_LOVER_PASSWORD }}
       RAPID_HOST: ${{ secrets.RAPID_HOST }}
       RAPID_KEY: ${{ secrets.RAPID_KEY }}
     steps:
@@ -24,11 +24,6 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-      - name: Start selenium standalone
-        run: |
-          docker pull selenium/standalone-chrome
-          docker run -d -p4444:4444 selenium/standalone-chrome
-          docker ps
       - name: Install dependencies
         run: |
           curl -sSL https://install.python-poetry.org | python -

@@ -1,91 +1,117 @@
 
-from selenium import webdriver
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
-from pydash import last, nth, get
-import time
+from pydash import get, find
+import requests
 import os
-import urllib
-import traceback
-
-WALLET_IDS = {
-    'DAVIVIENDA': 'wallet_dialog_1',
-    'VISA': 'wallet_dialog_3'
-}
+import re
+import datetime
 
 CATEGORY_TYPE = {
-    'expense': 'EXPENSE',
-    'income': 'INCOME',
-    'debt': 'DEBT/LOAN'
+    'income': 1,
+    'expense': 2
 }
 
-URL = 'https://web.moneylover.me/'
-ML_USER = os.getenv('MONEY_LOVER_USER')
-ML_PASS = os.getenv('MONEY_LOVER_PASSWORD')
+class MoneyLover:
+    URL = 'https://web.moneylover.me'
+    AUTH_URL = 'https://oauth.moneylover.me'
 
-def login():
-    global driver
-    global wait
-    print('Money lover: Starting selenium session')
-    driver = WebDriver(
-        command_executor='http://localhost:4444/wd/hub',
-        desired_capabilities={'browserName': 'firefox'})
-    wait = WebDriverWait(driver, 10)
-    print('Money lover: Starting login process')
-    driver.get(URL)
-    wait.until(lambda d: d.find_element_by_id('input-26'))
-    driver.find_element_by_id('input-26').send_keys(ML_USER)
-    driver.find_element_by_id('input-28').send_keys(ML_PASS)
-    driver.find_element_by_class_name('btn-submit-ml').click()
-    time.sleep(10)
-    print('Money lover: login process finished')
-    wait.until(lambda d: d.find_element_by_id('master-container'))
+    def __init__(self):
+        self.login()
+        self.set_categories()
+        self.set_wallets()
 
-def sign_out():
-    print('Money Lover: Starting sign out process')
-    wait.until(lambda d: d.find_element_by_class_name('item-navigation').is_displayed())
-    driver.find_element_by_class_name('item-navigation').click()
-    wait.until(lambda d: d.find_element_by_class_name('screen_30').is_displayed())
-    driver.find_element_by_class_name('screen_30').click()
-    wait.until(lambda d: d.find_element_by_class_name('singout-text').is_displayed())
-    driver.find_element_by_class_name('singout-text').click()
-    wait.until(lambda d: d.find_element_by_class_name('page-not-found').is_displayed())
-    print('Money lover: sign out process finished - finishing money lover session')
-    driver.close()
+    def login(self):
+        print('Money lover: Starting login process')
+        global access_token, refresh_token
+        response = requests.post(
+            f'{self.AUTH_URL}/token',
+            headers=self.get_login_headers(),
+            data={
+                "client_info": True,
+                "email": os.getenv('MONEY_LOVER_USER'),
+                "password": os.getenv('MONEY_LOVER_PASSWORD')
+            })
+        access_token = get(response.json(), 'access_token')
+        refresh_token = get(response.json(), 'refresh_token')
 
-def add_transaction(wallet, amount, category, description):
-    print('Money lover: starting to add new transaction for wallet {wallet}'.format(wallet=wallet))
-    driver.find_element_by_class_name('button-add-tran-toolbar').click()
+    def get_login_headers(self):
+        response = requests.post(
+            f'{self.URL}/api/user/login-url',
+            data={
+                "force": False,
+                "callback_url": self.URL
+            })
 
-    print('Money lover: selecting wallet {wallet}'.format(wallet=wallet))
-    wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .wallet').is_displayed())
-    driver.find_element_by_css_selector('.v-dialog--active .wallet').click()
-    wait.until(lambda d: d.find_element_by_id(WALLET_IDS.get(wallet)).is_displayed())
-    driver.find_element_by_id(WALLET_IDS.get(wallet)).click()
+        login_url = get(response.json(), 'data.login_url')
+        match = re.search(r'client=(.*)&token=(.*)&', login_url)
+        client = match.group(1)
+        token = match.group(2)
+        return {
+            'client': client,
+            'Authroization': f'Bearer {token}'
+        }
 
-    print('Money lover: selecting category {category}'.format(category=category))
-    wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .category').is_displayed())
-    driver.find_element_by_css_selector('.v-dialog--active .category').click()
-    time.sleep(5)
-    wait.until(lambda d: d.find_element_by_css_selector('[href="#tab-3"]').is_displayed())
-    wait.until(lambda d: d.find_element_by_css_selector('[href="#tab-1"]').is_displayed())
-    if (category['type'] == CATEGORY_TYPE['income']): driver.find_element_by_css_selector('[href="#tab-3"]').click()
-    if (category['type'] == CATEGORY_TYPE['debt']): driver.find_element_by_css_selector('[href="#tab-1"]').click()
-    wait.until(lambda d: d.find_element_by_id('input-search-focus').is_displayed())
-    driver.find_element_by_id('input-search-focus').send_keys(category['item'])
-    time.sleep(1)
-    wait.until(lambda d: d.find_element_by_class_name('screen_cate_1').is_displayed())
-    driver.find_element_by_class_name('screen_cate_1').click()
+    def sign_out(self):
+        print('Money Lover: Starting sign out process')
+        response = requests.post(
+            f'{self.URL}/api/user/logout',
+            headers={
+                'authorization': f'AuthJWT {access_token}'
+            },
+            data={
+                'refreshToken': refresh_token
+            })
 
-    print('Money lover: setting amount {amount}'.format(amount=amount))
-    wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .amount input').is_displayed())
-    driver.find_element_by_css_selector('.v-dialog--active .amount input').send_keys(amount)
-    driver.find_element_by_css_selector('.v-dialog--active .note input').send_keys(description)
+        if response.status_code == 200:
+            print('Money Lover: Starting sign out process')
 
-    print('Money lover: saving transaction')
-    wait.until(lambda d: d.find_element_by_css_selector('.v-dialog--active .done').is_enabled())
-    driver.find_element_by_css_selector('.v-dialog--active .done').click()
-    print('Money lover: adding transaction process finished for wallet {wallet}'.format(wallet=wallet))
-    time.sleep(5)
+    def add_transaction(self, wallet, amount, category, description):
+        print('Money lover: starting to add new transaction for wallet {wallet}'.format(wallet=wallet))
+        response = requests.post(
+            f'{self.URL}/api/transaction/add',
+            headers={
+                'authorization': f'AuthJWT {access_token}'
+            },
+            data={
+                "account": get(self.get_wallet(wallet), '_id'),
+                "category": get(self.get_category(category, wallet), '_id'),
+                "amount": amount,
+                "note": description,
+                "displayDate": (datetime.datetime.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+            }
+        )
+        if response.status_code == 200:
+            print(f'Money lover: Transaction with description "{description}" finished SUCCESS for wallet {wallet}')
+        else:
+            print(f'Money lover: Transaction with description "{description}" finished FAILED for wallet {wallet} with error {response.text}')
+
+    def get_wallet(self, name):
+        print(f'Money lover: retrieving data for wallet {name}')
+        return find(self.wallets,
+                    lambda wallet: get(wallet, 'name').casefold() == name.casefold())
+
+    def set_categories(self):
+        print('Money lover: retrieving all existing categories')
+        response = requests.get(
+            f'{self.URL}/api/category/list-all',
+            headers={
+                'authorization': f'AuthJWT {access_token}'
+            })
+
+        self.categories = get(response.json(), 'data')
+
+    def get_category(self, category, wallet):
+        print(f'Money lover: retrieving data for category {category} in wallet {wallet}')
+        return find(self.categories,
+                    lambda c: get(c, 'name').casefold() == get(category, 'name').casefold() and
+                            get(c, 'type') == get(category, 'type') and
+                            get(c, 'account') == get(self.get_wallet(wallet), '_id'))
+
+    def set_wallets(self):
+        print('Money lover: retrieving all existing wallets')
+        response = requests.get(
+            f'{self.URL}/api/wallet/list',
+            headers={
+                'authorization': f'AuthJWT {access_token}'
+            })
+
+        self.wallets = get(response.json(), 'data')

@@ -159,3 +159,4 @@ dmypy.json
 
 env.txt
 moneylover-*.json
+**/.DS_Store
