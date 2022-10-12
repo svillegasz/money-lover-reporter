@@ -13,7 +13,7 @@ imap.select('Inbox')
 
 def get_messages(sender, exclude = None):
     print('Gmail imap: getting messages for {sender}'.format(sender=sender))
-    imap.literal = u'from:{sender} newer_than:1d in:inbox transacción {exclude}'.format(sender=sender, exclude='-' + exclude if exclude else '').encode('utf-8')
+    imap.literal = u'from:{sender} newer_than:2d in:inbox transacción {exclude}'.format(sender=sender, exclude='-' + exclude if exclude else '').encode('utf-8')
     response, data = imap.uid('SEARCH', 'CHARSET', 'UTF-8', 'X-GM-RAW')
     if response != 'OK':
         print('Gmail imap: No gmail messages found')

@@ -39,7 +39,7 @@ GOOGLE_CATEGORIES = {
 }
 
 def classify(text):
-    print('Categorizer: classifying {text} with google cloud'.format(text=text))
+    print('Categorizer: classifying text with google cloud'.format(text=text))
     language_client = language_v1.LanguageServiceClient()
     document = language_v1.Document(
         content=text, type_=language_v1.Document.Type.PLAIN_TEXT
@@ -81,7 +81,7 @@ def predefined_category(text):
     if has_substr(lower_case(text), 'canon'): return 'Rentals'
 
 def categorize(text):
-    print('Categorizer: starting categorization process for {text}'.format(text=text))
+    print(f'Categorizer: starting categorization process for {text}')
     if predefined_category(text):
         print('Categorizer: returning predifined categroy')
         return predefined_category(text)
@@ -89,7 +89,7 @@ def categorize(text):
     if not result:
         print('Categorizer: not search results found (returned others)')
         return 'Others'
-    print('Categorizer: translating search results to english -> {result}'.format(result=result))
+    print(f'Categorizer: translating search results for "{text}" to english')
     translated_result = translator.translate(result).text
     category = classify(translated_result)
     if not category or not has(GOOGLE_CATEGORIES, category):
