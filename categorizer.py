@@ -79,6 +79,7 @@ def predefined_category(text):
     if has_substr(lower_case(text), 'credito visa'): return 'Credit Card'
     if has_substr(lower_case(text), 'fiducredicorp'): return 'Apartment'
     if has_substr(lower_case(text), 'canon'): return 'Rentals'
+    if has_substr(lower_case(text), 'enlace operativo'): return 'Bills & Utilities'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')

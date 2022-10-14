@@ -38,9 +38,9 @@ def process_scotiabank_message(message):
 
 def process_pse_message(message):
     print('PSE(bancolombia): processing message')
-    data = lines(last(message.table.table.find_all('span')))
-    desc = re.sub(r'<[^<>]*>', '', nth(data, 1)).strip()
-    amount = re.sub(r'[^\d,]', '', nth(data, 3)).replace(',', '.')
+    spans = message.select('table tr:nth-child(2) table tr:last-child td > span span')
+    desc = nth(nth(spans, 2).find_all('span'), 1).text.replace('Empresa:', '').strip()
+    amount = re.sub(r'[^\d,]', '', nth(lines(last(spans)), 1)).replace(',', '.')
     is_visa = has_substr(lower_case(desc), 'credito visa')
     if is_visa:
         visa_category_type = CATEGORY_TYPE['income']
@@ -74,7 +74,7 @@ def update_pse_wallet(messages):
     for msg_id in messages:
         message = gmail.get_message(msg_id)
         amount, category, desc, visa_category = process_pse_message(message)
-        moneylover.add_transaction('DAVIVIENDA', amount, category, desc)
+        moneylover.add_transaction('Bancolombia', amount, category, desc)
         if visa_category:
             moneylover.add_transaction('VISA', amount, visa_category, desc)
     print('PSE(bancolombia): Updating bancolombia(pse) wallet process started')
