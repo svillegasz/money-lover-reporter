@@ -4,6 +4,7 @@ from googletrans import Translator
 import json
 import requests
 import os
+import re
 
 translator = Translator()
 
@@ -30,7 +31,7 @@ GOOGLE_CATEGORIES = {
     'People & Society': 'Entertainment',
     'Pets & Animals': 'Pets',
     'Real Estate': 'Others',
-    'Reference': 'Education',
+    'Reference': 'Others',
     'Science': 'Education',
     'Sensitive Subjects': 'Others',
     'Shopping': 'Shopping',
@@ -72,14 +73,18 @@ def search(text):
         return ' '.join(map_(get(response.json(), 'data.organic'), 'snippet'))
 
 def predefined_category(text):
-    if has_substr(lower_case(text), 'une'): return 'Bills & Utilities'
+    if has_substr(lower_case(text), 'une'): return 'Internet'
     if has_substr(lower_case(text), 'rappi'): return 'Food & Beverage'
-    if has_substr(lower_case(text), 'comcel'): return 'Bills & Utilities'
+    if has_substr(lower_case(text), 'comcel'): return 'Phone'
     if has_substr(lower_case(text), 'nequi'): return 'Nequi'
-    if has_substr(lower_case(text), 'credito visa'): return 'Credit Card'
+    if has_substr(lower_case(text), 'scotiabank'): return 'Credit Card'
+    if has_substr(lower_case(text), 'davivienda'): return 'Auto Loan'
     if has_substr(lower_case(text), 'fiducredicorp'): return 'Apartment'
     if has_substr(lower_case(text), 'canon'): return 'Rentals'
-    if has_substr(lower_case(text), 'enlace operativo'): return 'Bills & Utilities'
+    if has_substr(lower_case(text), 'enlace operativo'): return 'Insurances'
+    if has_substr(lower_case(text), 'a toda hora'): return 'Fees & Charges'
+    if has_substr(lower_case(text), 'itaú'): return 'Apartment'
+    if has_substr(lower_case(text), 'finanseguro'): return 'Insurances'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')
