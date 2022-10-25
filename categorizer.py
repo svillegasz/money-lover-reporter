@@ -60,8 +60,7 @@ def search(text):
     payload = {
         "query": text,
         "gl": "CO",
-        "hl": "es_CO",
-        "pages": 2
+        "hl": "es_CO"
     }
     response = requests.post(
         "https://api.serpsbot.com/v2/google/organic-search",
