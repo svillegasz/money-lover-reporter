@@ -55,8 +55,7 @@ def classify(text):
 def search(text):
     print('Categorizer: searching {text} in google'.format(text=text))
     headers = {
-        "X-RapidAPI-Key": os.getenv('RAPID_KEY'),
-        "X-RapidAPI-Host" : os.getenv('RAPID_HOST')
+        "X-API-KEY": os.getenv('SERPSBOT_API_KEY')
     }
     payload = {
         "query": text,
@@ -65,7 +64,7 @@ def search(text):
         "pages": 2
     }
     response = requests.post(
-        "https://google-search-5.p.rapidapi.com/google/organic-search",
+        "https://api.serpsbot.com/v2/google/organic-search",
         headers=headers,
         data=json.dumps(payload))
 
