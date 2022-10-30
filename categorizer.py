@@ -48,8 +48,9 @@ def classify(text):
     response = language_client.classify_text(request={'document': document})
     print(f'Categorizer: availabe categories for text -> {response}')
     category = get(nth(get(response, 'categories')), 'name')
+    confidence = get(nth(get(response, 'categories')), 'confidence')
     print('Categorizer: google cloud category -> {category}'.format(category=category))
-    if category:
+    if confidence > 0.5 and category:
         return nth(split(category, '/'), 1)
 
 def search(text):
@@ -71,18 +72,17 @@ def search(text):
         return ' '.join(map_(get(response.json(), 'data.organic'), 'snippet'))
 
 def predefined_category(text):
-    if has_substr(lower_case(text), 'une'): return 'Internet'
-    if has_substr(lower_case(text), 'rappi'): return 'Food & Beverage'
-    if has_substr(lower_case(text), 'comcel'): return 'Phone'
-    if has_substr(lower_case(text), 'nequi'): return 'Nequi'
-    if has_substr(lower_case(text), 'scotiabank'): return 'Credit Card'
+    if any(has_substr(lower_case(text, concept)) for concept in ['fiducredicorp', 'itaú']): return 'Apartment'
+    if any(has_substr(lower_case(text, concept)) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
+    if any(has_substr(lower_case(text, concept)) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
+    if any(has_substr(lower_case(text, concept)) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
     if has_substr(lower_case(text), 'davivienda'): return 'Auto Loan'
-    if has_substr(lower_case(text), 'fiducredicorp'): return 'Apartment'
-    if has_substr(lower_case(text), 'canon'): return 'Rentals'
-    if has_substr(lower_case(text), 'enlace operativo'): return 'Insurances'
+    if has_substr(lower_case(text), 'scotiabank'): return 'Credit Card'
     if has_substr(lower_case(text), 'a toda hora'): return 'Fees & Charges'
-    if has_substr(lower_case(text), 'itaú'): return 'Apartment'
-    if has_substr(lower_case(text), 'finanseguro'): return 'Insurances'
+    if has_substr(lower_case(text), 'une'): return 'Internet'
+    if has_substr(lower_case(text), 'nequi'): return 'Nequi'
+    if has_substr(lower_case(text), 'comcel'): return 'Phone'
+    if has_substr(lower_case(text), 'canon'): return 'Rentals'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')
@@ -97,7 +97,7 @@ def categorize(text):
     translated_result = translator.translate(result).text
     category = classify(translated_result)
     if not category or not has(GOOGLE_CATEGORIES, category):
-        print('Categorizer: not category found in categories (returned others)')
+        print('Categorizer: not (strong) matching  category (returned others)')
         return 'Others'
     print('Categorizer: Full categorization process completed (category {category})'.format(category=category))
     return get(GOOGLE_CATEGORIES, category)
