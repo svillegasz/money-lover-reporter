@@ -32,7 +32,7 @@ def process_bancolombia_message(message):
         category_type = CATEGORY_TYPE['expense']
         desc, category_name = ('Retiro', 'Withdrawal') if has_substr(content, 'retiro') else ('Transferencia', 'Others')
 
-    is_visa_expense = is_expense and has_substr(content, 'scotiabank')
+    is_visa_expense = is_expense and has_substr(content, 'pagos electronicos s')
     if is_visa_expense: 
         visa_category_type, visa_category_name = (CATEGORY_TYPE['income'], 'Payment')
     
@@ -51,9 +51,9 @@ def update_bancolombia_wallet(messages):
     print('Bancolombia: Updating wallet process started')
     for msg_id in messages:
         message = gmail.get_message(msg_id)
-        amount, category, desc, visa_category = process_bancolombia_message(message)
-        if not amount:
+        if has_substr(message.text.strip().lower(), 'transf. internacional'): # Ignore international transfer (Manual Input) - We can not know with full accuraccy what the actual income in COP is, because there is not notifification when converting usd to cop
             continue
+        amount, category, desc, visa_category = process_bancolombia_message(message)
         moneylover.add_transaction('Bancolombia', amount, category, desc)
         if visa_category:
             moneylover.add_transaction('VISA', amount, visa_category, desc)

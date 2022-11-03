@@ -4,7 +4,6 @@ from googletrans import Translator
 import json
 import requests
 import os
-import re
 
 translator = Translator()
 
@@ -50,7 +49,7 @@ def classify(text):
     category = get(nth(get(response, 'categories')), 'name')
     confidence = get(nth(get(response, 'categories')), 'confidence')
     print('Categorizer: google cloud category -> {category}'.format(category=category))
-    if confidence > 0.5 and category:
+    if category and confidence > 0.5:
         return nth(split(category, '/'), 1)
 
 def search(text):
@@ -72,12 +71,12 @@ def search(text):
         return ' '.join(map_(get(response.json(), 'data.organic'), 'snippet'))
 
 def predefined_category(text):
-    if any(has_substr(lower_case(text, concept)) for concept in ['fiducredicorp', 'itaú']): return 'Apartment'
-    if any(has_substr(lower_case(text, concept)) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
-    if any(has_substr(lower_case(text, concept)) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
-    if any(has_substr(lower_case(text, concept)) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
+    if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau']): return 'Apartment'
+    if any(has_substr(lower_case(text), concept) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
+    if any(has_substr(lower_case(text), concept) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
+    if any(has_substr(lower_case(text), concept) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
     if has_substr(lower_case(text), 'davivienda'): return 'Auto Loan'
-    if has_substr(lower_case(text), 'scotiabank'): return 'Credit Card'
+    if has_substr(lower_case(text), 'pagos electronicos s'): return 'Credit Card'
     if has_substr(lower_case(text), 'a toda hora'): return 'Fees & Charges'
     if has_substr(lower_case(text), 'une'): return 'Internet'
     if has_substr(lower_case(text), 'nequi'): return 'Nequi'

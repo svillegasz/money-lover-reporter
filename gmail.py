@@ -18,11 +18,12 @@ def get_messages(sender):
     if response != 'OK':
         print('Gmail imap: No gmail messages found')
         return
+    print(data)
     return data[0].split()
 
 def get_message(msg_id):
     print('Gmail imap: getting message with id {msg_id}'.format(msg_id=msg_id))
-    response, data=imap.fetch(msg_id,'(RFC822)')
+    response, data = imap.uid('FETCH', msg_id,'(RFC822)')
     msg = email.message_from_bytes(data[0][1])
     content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
     message = BeautifulSoup(content, 'html.parser')
