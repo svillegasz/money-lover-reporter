@@ -18,7 +18,6 @@ def get_messages(sender):
     if response != 'OK':
         print('Gmail imap: No gmail messages found')
         return
-    print(data)
     return data[0].split()
 
 def get_message(msg_id):

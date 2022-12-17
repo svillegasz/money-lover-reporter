@@ -75,6 +75,8 @@ def predefined_category(text):
     if any(has_substr(lower_case(text), concept) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
     if any(has_substr(lower_case(text), concept) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
     if any(has_substr(lower_case(text), concept) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
+    if any(has_substr(lower_case(text), concept) for concept in ['mercado madrid', 'fruver']): return 'Groceries'
+    if any(has_substr(lower_case(text), concept) for concept in ['servi estadio', 'distracom']): return 'Petrol'
     if has_substr(lower_case(text), 'davivienda'): return 'Auto Loan'
     if has_substr(lower_case(text), 'pagos electronicos s'): return 'Credit Card'
     if has_substr(lower_case(text), 'a toda hora'): return 'Fees & Charges'
