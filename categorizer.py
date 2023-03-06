@@ -42,7 +42,9 @@ def classify(text):
     print('Categorizer: classifying text with google cloud'.format(text=text))
     language_client = language_v1.LanguageServiceClient()
     document = language_v1.Document(
-        content=text, type_=language_v1.Document.Type.PLAIN_TEXT
+        content=text, 
+        type_=language_v1.Document.Type.PLAIN_TEXT,
+        language="en"
     )
     response = language_client.classify_text(request={'document': document})
     print(f'Categorizer: availabe categories for text -> {response}')
