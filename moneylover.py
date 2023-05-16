@@ -121,7 +121,7 @@ class MoneyLover:
         self.wallets = get(response.json(), 'data')
 
     def check_response(self, response, success='Request call was SUCCESS', failure='Request call FAILED'):
-        if get(response.json(), 'error') == 0 or get(response.json(), 'e') == 0 or get(response.json(), 'status'):
+        if response.ok and ( get(response.json(), 'error') == 0 or get(response.json(), 'e') == 0 or get(response.json(), 'status') ):
             print(f'Money lover: {success} for endpoint {response.url}')
         else:
-            print(f'Money lover: {failure} for endpoint {response.url} with error: {response.text}')
+            print(f'Money lover: {failure} for endpoint {response.url} with status {response.reason} and error: {response.text}')
