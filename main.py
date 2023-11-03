@@ -6,7 +6,7 @@ import gmail
 import re
 
 BANCOLOMBIA_EMAIL = 'alertasynotificaciones@notificacionesbancolombia.com'
-SCOTIABANK_EMAIL = 'colpatriaInforma@colpatria.com'
+SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 moneylover = MoneyLover()
 
 
