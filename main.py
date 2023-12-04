@@ -5,7 +5,7 @@ from moneylover import MoneyLover, CATEGORY_TYPE
 import gmail
 import re
 
-BANCOLOMBIA_EMAIL = 'alertasynotificaciones@notificacionesbancolombia.com'
+BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com'
 SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 moneylover = MoneyLover()
 
