@@ -22,7 +22,7 @@ jobs:
       - name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
-          ≈: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
       - name: Install dependencies
         run: |
           curl -sSL https://install.python-poetry.org | python -
