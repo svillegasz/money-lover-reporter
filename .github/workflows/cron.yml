@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   cron:
-    runs-on: macos-12
+    runs-on: macos-latest
     env:
       GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
       GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
@@ -19,14 +19,15 @@ jobs:
         with:
           python-version: '3.9'
           architecture: 'x64'
+      - uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: '1.7.1'
       - name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
       - name: Install dependencies
-        run: |
-          curl -sSL https://install.python-poetry.org | python -
-          poetry install
+        run: poetry install
       - name: Execute reporter
         run: poetry run python main.py
       - name: Keep alive 
