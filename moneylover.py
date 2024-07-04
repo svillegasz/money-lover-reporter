@@ -38,7 +38,7 @@ class MoneyLover:
         response = requests.post(
             f'{self.URL}/api/user/login-url',
             data={
-                "force": False,
+                "force": True,
                 "callback_url": self.URL
             })
         self.check_response(response)
