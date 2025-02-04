@@ -29,7 +29,7 @@ jobs:
           apt-get install -y curl
       - name: Test login url
         run: |
-          curl --location 'https://web.moneylover.me/api/user/login-url' \
+          curl --location 'http://web.moneylover.me/api/user/login-url' \
           --header 'Content-Type: application/json' \
           --data '{ \"force\": false, \"callback_url\": \"https://google.com" }'
       - name: Install Docker
