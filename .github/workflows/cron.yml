@@ -31,7 +31,7 @@ jobs:
         run: |
           curl --location 'https://web.moneylover.me/api/user/login-url' \
           --header 'Content-Type: application/json' \
-          --data '{ \"force\": true, \"callback_url\": \"https://web.moneylover.me" }'
+          --data '{ \"force\": false, \"callback_url\": \"https://google.com" }'
       - name: Install Docker
         run: |
           apt-get update
