@@ -25,9 +25,16 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-      - name: Install dependencies
-        run: poetry install
+      - name: Build Docker Image
+        run: docker build -t money-lover-reporter .
       - name: Execute reporter
-        run: poetry run python main.py
+        run: |
+          docker run --rm \
+            -e GOOGLE_USER=${{ secrets.GOOGLE_USER }} \
+            -e GOOGLE_PASSWORD=${{ secrets.GOOGLE_PASSWORD }} \
+            -e MONEY_LOVER_USER=${{ secrets.MONEY_LOVER_USER }} \
+            -e MONEY_LOVER_PASSWORD=${{ secrets.MONEY_LOVER_PASSWORD }} \
+            -e SERPSBOT_API_KEY=${{ secrets.SERPSBOT_API_KEY }} \
+            money-lover-reporter
       - name: Keep alive 
         uses: gautamkrishnar/keepalive-workflow@v1
