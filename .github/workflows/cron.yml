@@ -26,7 +26,7 @@ jobs:
       - name: Install Curl
         run: |
           apt-get update
-          apt-get install curl
+          apt-get install -y curl
       - name: Test login url
         run: |
           curl --location 'https://web.moneylover.me/api/user/login-url' \
