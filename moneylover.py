@@ -35,18 +35,20 @@ class MoneyLover:
         refresh_token = get(response.json(), 'refresh_token')      
 
     def get_login_headers(self):
-        response = requests.post(
-            f'{self.URL}/api/user/login-url',
-            data={
-                "force": True,
-                "callback_url": self.URL
-            })
-        self.check_response(response)
+        # response = requests.post(
+        #     f'{self.URL}/api/user/login-url',
+        #     data={
+        #         "force": True,
+        #         "callback_url": self.URL
+        #     })
+        # self.check_response(response)
 
-        login_url = get(response.json(), 'data.login_url')
-        match = re.search(r'client=(.*)&token=(.*)&', login_url)
-        client = match.group(1)
-        token = match.group(2)
+        # login_url = get(response.json(), 'data.login_url')
+        # match = re.search(r'client=(.*)&token=(.*)&', login_url)
+        # client = match.group(1)
+        # token = match.group(2)
+        client = 'kHiZbFQOw5LV'
+        token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicmVxdWVzdC10b2tlbiIsImNvZGUiOiI4M2M5M2M3Ny0wNmE0LTQyNjAtYjIxOC04OWExNzk4ZjZmNDIiLCJjbGllbnRJZCI6IjVhY2FmMzA0YWE2Y2M1MGM3N2Y3ZDIyOCIsImNsaWVudE5hbWUiOiJNb25leWxvdmVyIFdlYiIsImludGVybmFsIjp0cnVlLCJjbGllbnQiOiJrSGlaYkZRT3c1TFYiLCJpYXQiOjE3Mzg4MDM1MzEsImV4cCI6MTczODgwNzEzMX0.ZCv3p-IojSqAhjPzxcZMGvP2IJ-IjYmF-IkAlwlKAJA'
         return {
             'client': client,
             'Authorization': f'Bearer {token}'
