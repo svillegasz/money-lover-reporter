@@ -41,8 +41,8 @@ class MoneyLover:
                     time.sleep(delay)
                     continue
                 return response
-            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError):
-                print('Proxy connection refused or connection error, retrieving a new proxy...')
+            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError) as e:
+                print(f'Proxy connection refused or connection error: {e}.\nRetrying a new proxy...')
                 kwargs['proxies'] = self.get_proxy()
                 time.sleep(delay)
         raise requests.exceptions.ProxyError("Proxy connection failed after multiple attempts.")
