@@ -6,14 +6,6 @@ on:
 jobs:
   cron:
     runs-on: ubuntu-latest
-    services:
-      docker:
-        image: docker:dind
-        options: --privileged --shm-size=2g
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ros
-    container:
-      image: ubuntu:latest
     env:
       GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
       GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
@@ -23,39 +15,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
-      - name: Install Curl
-        run: |
-          apt-get update
-          apt-get install -y curl
-      - name: Test login url
-        run: |
-          curl --location 'http://web.moneylover.me/api/user/login-url' \
-          --header 'Content-Type: application/json' \
-          --header 'Host: web.moneylover.me' \
-          --header 'User-Agent: Mozilla/5.0' \
-          --data '{ \"force\": false, \"callback_url\": \"https://google.com" }'
-      - name: Install Docker
-        run: |
-          apt-get update
-          apt-get install -y docker.io
-      - name: Test Docker
-        run: |
-          docker version
-          docker info 
+      - uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: '2.0.1'
       - name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-      - name: Build Docker Image
-        run: docker build -t money-lover-reporter .
+      - name: Install dependencies
+        run: poetry install
       - name: Execute reporter
-        run: |
-          docker run --rm \
-            -e GOOGLE_USER=${{ secrets.GOOGLE_USER }} \
-            -e GOOGLE_PASSWORD=${{ secrets.GOOGLE_PASSWORD }} \
-            -e MONEY_LOVER_USER=${{ secrets.MONEY_LOVER_USER }} \
-            -e MONEY_LOVER_PASSWORD=${{ secrets.MONEY_LOVER_PASSWORD }} \
-            -e SERPSBOT_API_KEY=${{ secrets.SERPSBOT_API_KEY }} \
-            money-lover-reporter
+        run: poetry run python main.py
       - name: Keep alive 
         uses: gautamkrishnar/keepalive-workflow@v1

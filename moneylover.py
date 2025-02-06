@@ -13,35 +13,62 @@ CATEGORY_TYPE = {
 class MoneyLover:
     URL = 'https://web.moneylover.me'
     AUTH_URL = 'https://oauth.moneylover.me'
+    PROXY_URL = 'http://pubproxy.com/api/proxy?post=true&https=true&format=txt&limit=1'
 
     def __init__(self):
         self.login()
         self.set_categories()
         self.set_wallets()
 
+    def get_proxy(self):
+        response = requests.get(self.PROXY_URL)
+        if response.status_code == 200:
+            return {'https': response.text.strip()}
+        else:
+            print(f'Moneylover: retrieving proxy using endpoint {response.url} failed with status {response.reason} and error: {response.text}')
+            return None
+
+    def make_request(self, method, url, **kwargs):
+        retries = 5
+        for _ in range(retries):
+            try:
+                response = requests.request(method, url, **kwargs)
+                if response.status_code == 403:
+                    print('Received 403 Forbidden, retrieving a new proxy...')
+                    kwargs['proxies'] = self.get_proxy()
+                    continue
+                return response
+            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError):
+                print('Proxy connection refused or connection error, retrieving a new proxy...')
+                kwargs['proxies'] = self.get_proxy()
+        raise requests.exceptions.ProxyError("Proxy connection failed after multiple attempts.")
+
     def login(self):
         print('Money lover: Starting login process')
         global access_token, refresh_token
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.AUTH_URL}/token',
             headers=self.get_login_headers(),
             data={
                 "client_info": True,
                 "email": os.getenv('MONEY_LOVER_USER'),
                 "password": os.getenv('MONEY_LOVER_PASSWORD')
-            })
+            },
+            proxies=self.get_proxy())
         self.check_response(response)
         access_token = get(response.json(), 'access_token')
         refresh_token = get(response.json(), 'refresh_token')      
 
     def get_login_headers(self):
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.URL}/api/user/login-url',
             data={
                 "force": True,
                 "callback_url": self.URL
             },
-            proxies={"http": "183.240.46.42:80", "https": "183.240.46.42:80"}
+            proxies=self.get_proxy()
         )
         self.check_response(response)
 
@@ -56,14 +83,17 @@ class MoneyLover:
 
     def sign_out(self):
         print('Money Lover: Starting sign out process')
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.URL}/api/user/logout',
             headers={
                 'authorization': f'AuthJWT {access_token}'
             },
             data={
                 'refreshToken': refresh_token
-            })
+            },
+            proxies=self.get_proxy())
+        
         self.check_response(response)
 
     def add_transaction(self, wallet, amount, category, description):
@@ -75,7 +105,8 @@ class MoneyLover:
                 "note": description,
                 "displayDate": (datetime.datetime.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
             })
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.URL}/api/transaction/add',
             headers={
                 'authorization': f'AuthJWT {access_token}'
@@ -86,7 +117,8 @@ class MoneyLover:
                 "amount": amount,
                 "note": description,
                 "displayDate": (datetime.datetime.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-            }
+            },
+            proxies=self.get_proxy()
         )
         self.check_response(response,
                             f'Money lover: Transaction with description "{description}" finished SUCCESS for wallet {wallet}',
@@ -98,11 +130,14 @@ class MoneyLover:
 
     def set_categories(self):
         print('Money lover: retrieving all existing categories')
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.URL}/api/category/list-all',
             headers={
                 'authorization': f'AuthJWT {access_token}'
-            })
+            },
+            proxies=self.get_proxy())
+        
         self.check_response(response)
         self.categories = get(response.json(), 'data')
 
@@ -114,11 +149,14 @@ class MoneyLover:
 
     def set_wallets(self):
         print('Money lover: retrieving all existing wallets')
-        response = requests.post(
+        response = self.make_request(
+            'POST',
             f'{self.URL}/api/wallet/list',
             headers={
                 'authorization': f'AuthJWT {access_token}'
-            })
+            },
+            proxies=self.get_proxy())
+        
         self.check_response(response)
         self.wallets = get(response.json(), 'data')
 
