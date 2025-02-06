@@ -4,6 +4,7 @@ import requests
 import os
 import re
 import datetime
+import time
 
 CATEGORY_TYPE = {
     'income': 1,
@@ -30,17 +31,20 @@ class MoneyLover:
 
     def make_request(self, method, url, **kwargs):
         retries = 5
+        delay = 1 # seconds
         for _ in range(retries):
             try:
                 response = requests.request(method, url, **kwargs)
                 if response.status_code == 403:
                     print('Received 403 Forbidden, retrieving a new proxy...')
                     kwargs['proxies'] = self.get_proxy()
+                    time.sleep(delay)
                     continue
                 return response
             except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError):
                 print('Proxy connection refused or connection error, retrieving a new proxy...')
                 kwargs['proxies'] = self.get_proxy()
+                time.sleep(delay)
         raise requests.exceptions.ProxyError("Proxy connection failed after multiple attempts.")
 
     def login(self):
