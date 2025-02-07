@@ -14,7 +14,7 @@ CATEGORY_TYPE = {
 class MoneyLover:
     URL = 'https://web.moneylover.me'
     AUTH_URL = 'https://oauth.moneylover.me'
-    PROXY_URL = 'http://pubproxy.com/api/proxy?post=true&https=true&format=txt&limit=1'
+    PROXY_URL = 'http://pubproxy.com/api/proxy?post=true&https=true&format=json&limit=1&port=9090,8080,80'
 
     def __init__(self):
         self.login()
