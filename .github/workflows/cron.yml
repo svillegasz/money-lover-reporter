@@ -27,4 +27,4 @@ jobs:
       - name: Execute reporter
         run: poetry run python main.py
       - name: Keep alive 
-        uses: gautamkrishnar/keepalive-workflow@v1
+        uses: gautamkrishnar/keepalive-workflow@v2
