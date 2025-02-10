@@ -56,21 +56,16 @@ def classify(text):
 
 def search(text):
     print('Categorizer: searching {text} in google'.format(text=text))
-    headers = {
-        "X-API-KEY": os.getenv('SERPSBOT_API_KEY')
-    }
-    payload = {
-        "query": text,
-        "gl": "CO",
-        "hl": "es_CO"
-    }
-    response = requests.post(
-        "https://api.serpsbot.com/v2/google/organic-search",
-        headers=headers,
-        data=json.dumps(payload))
+
+    response = requests.get(
+        f"https://serpapi.com/search.json?api_key={os.getenv('SERPSBOT_API_KEY')}&engine=google&q={text}&gl=co&hl=es-419"
+    )
 
     if response.status_code == 200:
-        return ' '.join(map_(get(response.json(), 'data.organic'), 'snippet'))
+        knowledge_graph = get(response.json(), 'knowledge_graph')
+        if knowledge_graph and 'type' in knowledge_graph:
+            return ' '.join([knowledge_graph['type']] * 20)
+        return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
 def predefined_category(text):
     if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau']): return 'Apartment'

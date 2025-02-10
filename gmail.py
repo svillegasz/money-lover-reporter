@@ -26,21 +26,27 @@ def get_messages(sender, retries=3):
         print('Max retries reached. Exiting.')
         return
 
-def get_message(msg_id):
+def get_message(msg_id, retries=3):
     print('Gmail imap: getting message with id {msg_id}'.format(msg_id=msg_id))
-    response, data = imap.uid('FETCH', msg_id,'(RFC822)')
-    msg = email.message_from_bytes(data[0][1])
-    # Check if the message is multipart
-    if msg.is_multipart():
-        # Iterate through the parts to find the text/plain or text/html part
-        for part in msg.walk():
-            if part.get_content_type() == 'text/html':
-                content = part.get_payload(decode=True).decode(part.get_content_charset()).encode('utf-8')
-                break
-        else:
-            # Fallback if no HTML part is found
-            content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
-    else:
-        content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
-    message = BeautifulSoup(content, 'html.parser')
-    return message
+    for attempt in range(retries):
+        try:
+            response, data = imap.uid('FETCH', msg_id, '(RFC822)')
+            msg = email.message_from_bytes(data[0][1])
+            # Check if the message is multipart
+            if msg.is_multipart():
+                # Iterate through the parts to find the text/plain or text/html part
+                for part in msg.walk():
+                    if part.get_content_type() == 'text/html':
+                        content = part.get_payload(decode=True).decode(part.get_content_charset()).encode('utf-8')
+                        break
+                else:
+                    # Fallback if no HTML part is found
+                    content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
+            else:
+                content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
+            message = BeautifulSoup(content, 'html.parser')
+            return message
+        except imaplib.IMAP4.abort as e:
+            print(f'Attempt {attempt + 1} failed: {e}. \nRetrying...')
+    print('Max retries reached. Exiting.')
+    return
