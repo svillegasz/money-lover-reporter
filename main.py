@@ -24,7 +24,7 @@ def process_bancolombia_message(message):
         match = re.search(r'(\d a .+ desde|en .* \d\d:\d\d)', content)
         desc = re.sub(r'(\d a | desde|en | \d\d:\d\d)', '', match.group(1))
         category_name = categorize(desc)
-    elif has_substr(content, 'recepcion transferencia'):
+    elif has_substr(content, 'recepcion transferencia') or has_substr(content, 'Bancolombia: Recibiste'):
         category_type, desc, category_name = (CATEGORY_TYPE['income'], 'Transferencias', 'Others')
     else:
         if  has_substr(content, 'retiro'):
