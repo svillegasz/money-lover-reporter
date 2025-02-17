@@ -64,6 +64,7 @@ def search(text):
     if response.status_code == 200:
         knowledge_graph = get(response.json(), 'knowledge_graph')
         if knowledge_graph and 'type' in knowledge_graph:
+            print('Categorizer: using knowledge grpah...')
             return ' '.join([knowledge_graph['type']] * 20)
         return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
@@ -88,6 +89,7 @@ def categorize(text):
         print('Categorizer: returning predifined categroy')
         return predefined_category(text)
     result = search(text)
+    print(f'Categorizer: describing text from search enginge -> {result}')
     if not result:
         print('Categorizer: not search results found (returned others)')
         return 'Others'
