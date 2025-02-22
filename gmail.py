@@ -23,8 +23,8 @@ def get_messages(sender, retries=3):
             return data[0].split()
         except imaplib.IMAP4.abort as e:
             print(f'Attempt {attempt + 1} failed: {e}. \nRetrying...')
-        print('Max retries reached. Exiting.')
-        return
+    print('Max retries reached. Exiting.')
+    return
 
 def get_message(msg_id, retries=3):
     print('Gmail imap: getting message with id {msg_id}'.format(msg_id=msg_id))
