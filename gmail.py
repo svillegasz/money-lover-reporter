@@ -20,6 +20,7 @@ def get_messages(sender, retries=3):
             if response != 'OK':
                 print('Gmail imap: No gmail messages found')
                 return
+            print(f'Gmail imap: messages for {sender} -> {data}')
             return data[0].split()
         except imaplib.IMAP4.abort as e:
             print(f'Attempt {attempt + 1} failed: {e}. \nRetrying...')
