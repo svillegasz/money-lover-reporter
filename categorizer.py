@@ -65,7 +65,7 @@ def search(text):
         knowledge_graph = get(response.json(), 'knowledge_graph')
         if knowledge_graph and 'type' in knowledge_graph:
             print('Categorizer: using knowledge grpah...')
-            return ' '.join([knowledge_graph['type']] * 20)
+            return ' '.join([knowledge_graph['type']] * 40)
         return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
 def predefined_category(text):
