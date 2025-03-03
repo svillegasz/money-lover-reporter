@@ -30,21 +30,21 @@ class MoneyLover:
             return None
 
     def make_request(self, method, url, **kwargs):
-        retries = 5
-        delay = 1 # seconds
+        retries = 10
+        delay = 3 # seconds
         for _ in range(retries):
             try:
                 response = requests.request(method, url, **kwargs)
                 if response.status_code == 403:
                     print('Received 403 Forbidden, retrieving a new proxy...')
-                    kwargs['proxies'] = self.get_proxy()
                     time.sleep(delay)
+                    kwargs['proxies'] = self.get_proxy()
                     continue
                 return response
             except (requests.exceptions.RequestException) as e:
                 print(f'Request error: {e}.\nRetrying a new proxy...')
-                kwargs['proxies'] = self.get_proxy()
                 time.sleep(delay)
+                kwargs['proxies'] = self.get_proxy()
         raise requests.exceptions.RequestException("Request through proxy failed after multiple attempts.")
 
     def login(self):
