@@ -9,9 +9,12 @@ jobs:
     env:
       GOOGLE_USER: ${{ secrets.GOOGLE_USER }}
       GOOGLE_PASSWORD : ${{ secrets.GOOGLE_PASSWORD }}
-      MONEY_LOVER_USER: ${{ secrets.MONEY_LOVER_USER }}
-      MONEY_LOVER_PASSWORD: ${{ secrets.MONEY_LOVER_PASSWORD }}
       SERPSBOT_API_KEY: ${{ secrets.SERPSBOT_API_KEY }}
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_ACCOUNTS_DB_ID: ${{ secrets.NOTION_ACCOUNTS_DB_ID }}
+      NOTION_EXPENSES_DB_ID: ${{ secrets.NOTION_EXPENSES_DB_ID }}
+      NOTION_INCOME_DB_ID: ${{ secrets.NOTION_INCOME_DB_ID }}
+      NOTION_CATEGORIES_DB_ID: ${{ secrets.NOTION_CATEGORIES_DB_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -26,5 +29,23 @@ jobs:
         run: poetry install
       - name: Execute reporter
         run: poetry run python main.py
-      - name: Keep alive 
-        uses: gautamkrishnar/keepalive-workflow@v2
+      - name: Check last commit date
+        id: check
+        run: |
+          LAST_COMMIT_DATE=$(git log -1 --format=%cI)
+          LAST_COMMIT_TIMESTAMP=$(date -d "$LAST_COMMIT_DATE" +%s)
+          NOW_TIMESTAMP=$(date +%s)
+          AGE_SECONDS=$((NOW_TIMESTAMP - LAST_COMMIT_TIMESTAMP))
+          AGE_DAYS=$((AGE_SECONDS / 86400))
+          
+          echo "Last commit was $AGE_DAYS days ago."
+          echo "age_days=$AGE_DAYS" >> "$GITHUB_OUTPUT"
+      - name: Make dummy commit if last commit > 45 days ago
+        if: steps.check.outputs.age_days > 45
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Keepalive: $(date)" > .keepalive
+          git add .keepalive
+          git commit -m "chore: keep repository alive (cron)"
+          git push

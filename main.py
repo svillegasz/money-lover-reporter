@@ -1,13 +1,13 @@
 from pydash import nth, has_substr
 from categorizer import categorize
 import traceback
-from moneylover import MoneyLover, CATEGORY_TYPE
+from moneytracker import MoneyTracker, CATEGORY_TYPE
 import gmail
 import re
 
 BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com'
 SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
-moneylover = MoneyLover()
+moneytracker = MoneyTracker()
 
 
 def process_bancolombia_message(message):
@@ -46,34 +46,41 @@ def process_scotiabank_message(message):
     category_name = categorize(desc)
     return amount, {'type': CATEGORY_TYPE['expense'], 'name': category_name}, desc
 
-def update_bancolombia_wallet(messages):
+def update_bancolombia_account(messages):
     if not messages: return
-    print('Bancolombia: Updating wallet process started')
+    print('Bancolombia: Updating account process started')
     for msg_id in messages:
-        message = gmail.get_message(msg_id)
-        if has_substr(message.text.strip().lower(), 'transf. internacional'): # Ignore international transfer (Manual Input) - We can not know with full accuraccy what the actual income in COP is, because there is not notifification when converting usd to cop
-            continue
-        amount, category, desc, visa_category = process_bancolombia_message(message)
-        moneylover.add_transaction('Bancolombia', amount, category, desc)
-        if visa_category:
-            moneylover.add_transaction('VISA', amount, visa_category, desc)
-    print('Bancolombia: Updating wallet process finished')
+        try:
+            message = gmail.get_message(msg_id)
+            if has_substr(message.text.strip().lower(), 'transf. internacional'): # Ignore international transfer (Manual Input) - We can not know with full accuraccy what the actual income in COP is, because there is not notifification when converting usd to cop
+                continue
+            amount, category, desc, visa_category = process_bancolombia_message(message)
+            moneytracker.add_transaction('Bancolombia', amount, category, desc)
+            if visa_category:
+                moneytracker.add_transaction('VISA', amount, visa_category, desc)
+        except:
+            print(f'Bancolombia: Error processing message {msg_id}')
+            traceback.print_exc()
+    print('Bancolombia: Updating account process finished')
 
-def update_scotiabank_wallet(messages):
+def update_scotiabank_account(messages):
     if not messages: return
-    print('Scotiabank: Updating wallet process started')
+    print('Scotiabank: Updating account process started')
     for msg_id in messages:
-        message = gmail.get_message(msg_id)
-        amount, category, desc = process_scotiabank_message(message)
-        moneylover.add_transaction('VISA', amount, category, desc)
-    print('Scotiabank: Updating wallet process finished')
+        try:
+            message = gmail.get_message(msg_id)
+            amount, category, desc = process_scotiabank_message(message)
+            moneytracker.add_transaction('Scotiabank (Credit Card)', amount, category, desc)
+        except:
+            print(f'Scotiabank: Error processing message {msg_id}')
+            traceback.print_exc()
+    print('Scotiabank: Updating account process finished')
 
 if __name__ == '__main__':
     bancolombia_messages = gmail.get_messages(BANCOLOMBIA_EMAIL)
     scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
     try:
-        update_bancolombia_wallet(bancolombia_messages)
-        update_scotiabank_wallet(scotiabank_messages)
+        update_bancolombia_account(bancolombia_messages)
+        update_scotiabank_account(scotiabank_messages)
     except:
         traceback.print_exc()
-    moneylover.sign_out()

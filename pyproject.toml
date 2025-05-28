@@ -7,12 +7,13 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4"
 dependencies = [
     "pydash (>=5.1.1,<6.0.0)",
     "beautifulsoup4 (>=4.11.1,<5.0.0)",
     "google-cloud-language (>=2.6.0,<3.0.0)",
-    "googletrans (==4.0.0-rc1)"
+    "google-cloud-translate (>=3.8.0,<4.0.0)",
+    "notion-client (>=2.3.0,<3.0.0)"
 ]
 
 [build-system]

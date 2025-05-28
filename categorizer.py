@@ -1,11 +1,11 @@
 from google.cloud import language_v1
+from google.cloud import translate_v2 as translate
 from pydash import map_, get, nth, has, has_substr, lower_case, split
-from googletrans import Translator
 import json
 import requests
 import os
 
-translator = Translator()
+translate_client = translate.Client()
 
 # Categories source https://cloud.google.com/natural-language/docs/categories
 GOOGLE_CATEGORIES = {
@@ -65,23 +65,20 @@ def search(text):
         knowledge_graph = get(response.json(), 'knowledge_graph')
         if knowledge_graph and 'type' in knowledge_graph:
             print('Categorizer: using knowledge grpah...')
-            return ' '.join([knowledge_graph['type']] * 40)
+            return ' '.join([knowledge_graph['type']] * 50)
         return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
 def predefined_category(text):
-    if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau']): return 'Apartment'
+    if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau']): return 'Marsella'
     if any(has_substr(lower_case(text), concept) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
     if any(has_substr(lower_case(text), concept) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
     if any(has_substr(lower_case(text), concept) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
     if any(has_substr(lower_case(text), concept) for concept in ['mercado madrid', 'fruver']): return 'Groceries'
-    if any(has_substr(lower_case(text), concept) for concept in ['servi estadio', 'distracom']): return 'Petrol'
-    if has_substr(lower_case(text), 'davivienda'): return 'Auto Loan'
+    if any(has_substr(lower_case(text), concept) for concept in ['servi estadio', 'distracom']): return 'Gas'
+    if has_substr(lower_case(text), 'davivienda'): return 'Car'
     if has_substr(lower_case(text), 'pagos electronicos s'): return 'Credit Card'
-    if has_substr(lower_case(text), 'a toda hora'): return 'Fees & Charges'
-    if has_substr(lower_case(text), 'une'): return 'Internet'
-    if has_substr(lower_case(text), 'nequi'): return 'Nequi'
-    if has_substr(lower_case(text), 'comcel'): return 'Phone'
-    if has_substr(lower_case(text), 'canon'): return 'Rentals'
+    if has_substr(lower_case(text), 'canon'): return 'Marsella'
+    if any(has_substr(lower_case(text), concept) for concept in ['a toda hora', 'une', 'comcel']): return 'Fees & Charges'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')
@@ -94,7 +91,7 @@ def categorize(text):
         print('Categorizer: not search results found (returned others)')
         return 'Others'
     print(f'Categorizer: translating search results for "{text}" to english')
-    translated_result = translator.translate(result).text
+    translated_result = translate_client.translate(result, target_language='en')['translatedText']
     category = classify(translated_result)
     if not category or not has(GOOGLE_CATEGORIES, category):
         print('Categorizer: not (strong) matching  category (returned others)')
