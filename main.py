@@ -1,14 +1,12 @@
 from pydash import nth, has_substr
 from categorizer import categorize
-import traceback
-from moneytracker import MoneyTracker, CATEGORY_TYPE
+from moneytracker import MoneyTracker
+from datetime import datetime
 import gmail
 import re
+from constants import RECURRING_TRANSACTIONS, BANCOLOMBIA_EMAIL, SCOTIABANK_EMAIL, CATEGORY_TYPE, BANCOLOMBIA_ACCOUNT, SCOTIABANK_ACCOUNT
 
-BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com'
-SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 moneytracker = MoneyTracker()
-
 are_messages_processed = True
 
 def process_bancolombia_message(message):
@@ -57,9 +55,9 @@ def update_bancolombia_account(messages):
             if has_substr(message.text.strip().lower(), 'transf. internacional'): # Ignore international transfer (Manual Input) - We can not know with full accuraccy what the actual income in COP is, because there is not notifification when converting usd to cop
                 continue
             amount, category, desc, visa_category = process_bancolombia_message(message)
-            moneytracker.add_transaction('Bancolombia', amount, category, desc)
+            moneytracker.add_transaction(BANCOLOMBIA_ACCOUNT, amount, category, desc)
             if visa_category:
-                moneytracker.add_transaction('VISA', amount, visa_category, desc)
+                moneytracker.add_transaction(SCOTIABANK_ACCOUNT, amount, visa_category, desc)
         except Exception as e:
             print(f'Bancolombia: Error processing message {msg_id}: {e}')
             are_messages_processed = False
@@ -73,17 +71,24 @@ def update_scotiabank_account(messages):
         try:
             message = gmail.get_message(msg_id)
             amount, category, desc = process_scotiabank_message(message)
-            moneytracker.add_transaction('Scotiabank (Credit Card)', amount, category, desc)
+            moneytracker.add_transaction(SCOTIABANK_ACCOUNT, amount, category, desc)
         except Exception as e:
             print(f'Scotiabank: Error processing message {msg_id}: {e}')
             are_messages_processed = False
     print('Scotiabank: Updating account process finished')
+
+def add_recurring_transactions():
+    for transaction in RECURRING_TRANSACTIONS:
+        if transaction['day'] == datetime.now().day:
+            print(f'{transaction["account"]}: Adding recurring transaction: {transaction}')
+            moneytracker.add_transaction(transaction['account'], transaction['amount'], transaction['category'], transaction['description'])
 
 if __name__ == '__main__':
     bancolombia_messages = gmail.get_messages(BANCOLOMBIA_EMAIL)
     scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
     update_bancolombia_account(bancolombia_messages)
     update_scotiabank_account(scotiabank_messages)
+    add_recurring_transactions()
 
     if not are_messages_processed:
         raise Exception('Failed to process some messages')

@@ -3,10 +3,7 @@ from notion_client import Client
 import os
 import datetime
 
-CATEGORY_TYPE = {
-    'income': 1,
-    'expense': 2
-}
+from constants import CATEGORY_TYPE
 
 class MoneyTracker:
     def __init__(self):

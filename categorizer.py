@@ -72,16 +72,18 @@ def search(text):
         return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
 def predefined_category(text):
-    if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau']): return 'Marsella'
+    if any(has_substr(lower_case(text), concept) for concept in ['fiducredicorp', 'itau', 'decolombia']): return 'Marsella'
+    if any(has_substr(lower_case(text), concept) for concept in ['abierta ali']): return 'Tierra grata'
     if any(has_substr(lower_case(text), concept) for concept in ['enlace operativo', 'finanseguro']): return 'Insurances'
     if any(has_substr(lower_case(text), concept) for concept in ['rappi', 'didi food']): return 'Food & Beverage'
     if any(has_substr(lower_case(text), concept) for concept in ['cabify', 'uber', 'didi']): return 'Transportation'
     if any(has_substr(lower_case(text), concept) for concept in ['mercado madrid', 'fruver']): return 'Groceries'
     if any(has_substr(lower_case(text), concept) for concept in ['servi estadio', 'distracom']): return 'Gas'
+    if any(has_substr(lower_case(text), concept) for concept in ['icetex']): return 'Education'
     if has_substr(lower_case(text), 'davivienda'): return 'Car'
     if has_substr(lower_case(text), 'pagos electronicos s'): return 'Credit Card'
     if has_substr(lower_case(text), 'canon'): return 'Marsella'
-    if any(has_substr(lower_case(text), concept) for concept in ['a toda hora', 'une', 'comcel']): return 'Bills & Utilities'
+    if any(has_substr(lower_case(text), concept) for concept in ['a toda hora', 'une', 'comcel', 'aval valor', 'factura movil', 'claro']): return 'Bills & Utilities'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')
