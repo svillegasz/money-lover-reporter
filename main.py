@@ -9,6 +9,9 @@ BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotifi
 SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 moneytracker = MoneyTracker()
 
+bancolombia_failed_messages = []
+scotiabank_failed_messages = []
+
 
 def process_bancolombia_message(message):
     print('Bancolombia: processing message')
@@ -58,8 +61,9 @@ def update_bancolombia_account(messages):
             moneytracker.add_transaction('Bancolombia', amount, category, desc)
             if visa_category:
                 moneytracker.add_transaction('VISA', amount, visa_category, desc)
-        except:
+        except Exception as e:
             print(f'Bancolombia: Error processing message {msg_id}')
+            bancolombia_failed_messages.append(msg_id)
             traceback.print_exc()
     print('Bancolombia: Updating account process finished')
 
@@ -71,16 +75,22 @@ def update_scotiabank_account(messages):
             message = gmail.get_message(msg_id)
             amount, category, desc = process_scotiabank_message(message)
             moneytracker.add_transaction('Scotiabank (Credit Card)', amount, category, desc)
-        except:
+        except Exception as e:
             print(f'Scotiabank: Error processing message {msg_id}')
+            scotiabank_failed_messages.append(msg_id)
             traceback.print_exc()
     print('Scotiabank: Updating account process finished')
 
 if __name__ == '__main__':
     bancolombia_messages = gmail.get_messages(BANCOLOMBIA_EMAIL)
     scotiabank_messages = gmail.get_messages(SCOTIABANK_EMAIL)
-    try:
-        update_bancolombia_account(bancolombia_messages)
-        update_scotiabank_account(scotiabank_messages)
-    except:
-        traceback.print_exc()
+    update_bancolombia_account(bancolombia_messages)
+    update_scotiabank_account(scotiabank_messages)
+
+    if bancolombia_failed_messages:
+        print(f'Bancolombia: Failed to process {len(bancolombia_failed_messages)} messages: {bancolombia_failed_messages}')
+    if scotiabank_failed_messages:
+        print(f'Scotiabank: Failed to process {len(scotiabank_failed_messages)} messages: {scotiabank_failed_messages}')
+    if bancolombia_failed_messages or scotiabank_failed_messages:
+        raise Exception('Failed to process some messages')
+    

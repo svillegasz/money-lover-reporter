@@ -78,7 +78,7 @@ def predefined_category(text):
     if has_substr(lower_case(text), 'davivienda'): return 'Car'
     if has_substr(lower_case(text), 'pagos electronicos s'): return 'Credit Card'
     if has_substr(lower_case(text), 'canon'): return 'Marsella'
-    if any(has_substr(lower_case(text), concept) for concept in ['a toda hora', 'une', 'comcel']): return 'Fees & Charges'
+    if any(has_substr(lower_case(text), concept) for concept in ['a toda hora', 'une', 'comcel']): return 'Bills & Utilities'
 
 def categorize(text):
     print(f'Categorizer: starting categorization process for {text}')
