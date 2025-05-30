@@ -41,6 +41,10 @@ GOOGLE_CATEGORIES = {
 def classify(text):
     print('Categorizer: classifying text with google cloud'.format(text=text))
     language_client = language_v1.LanguageServiceClient()
+
+    if len(text.split(' ')) < 60:
+        text = ' '.join([text] * (60 // len(text.split(' '))))
+
     document = language_v1.Document(
         content=text, 
         type_=language_v1.Document.Type.PLAIN_TEXT,
@@ -64,8 +68,7 @@ def search(text):
     if response.status_code == 200:
         knowledge_graph = get(response.json(), 'knowledge_graph')
         if knowledge_graph and 'type' in knowledge_graph:
-            print('Categorizer: using knowledge grpah...')
-            return ' '.join([knowledge_graph['type']] * 50)
+            return knowledge_graph['type']
         return ' '.join(map_(get(response.json(), 'organic_results'), 'snippet'))
 
 def predefined_category(text):
