@@ -9,9 +9,7 @@ BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotifi
 SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 moneytracker = MoneyTracker()
 
-bancolombia_failed_messages = []
-scotiabank_failed_messages = []
-
+are_messages_processed = True
 
 def process_bancolombia_message(message):
     print('Bancolombia: processing message')
@@ -50,6 +48,7 @@ def process_scotiabank_message(message):
     return amount, {'type': CATEGORY_TYPE['expense'], 'name': category_name}, desc
 
 def update_bancolombia_account(messages):
+    global are_messages_processed
     if not messages: return
     print('Bancolombia: Updating account process started')
     for msg_id in messages:
@@ -62,12 +61,12 @@ def update_bancolombia_account(messages):
             if visa_category:
                 moneytracker.add_transaction('VISA', amount, visa_category, desc)
         except Exception as e:
-            print(f'Bancolombia: Error processing message {msg_id}')
-            bancolombia_failed_messages.append(msg_id)
-            traceback.print_exc()
+            print(f'Bancolombia: Error processing message {msg_id}: {e}')
+            are_messages_processed = False
     print('Bancolombia: Updating account process finished')
 
 def update_scotiabank_account(messages):
+    global are_messages_processed
     if not messages: return
     print('Scotiabank: Updating account process started')
     for msg_id in messages:
@@ -76,9 +75,8 @@ def update_scotiabank_account(messages):
             amount, category, desc = process_scotiabank_message(message)
             moneytracker.add_transaction('Scotiabank (Credit Card)', amount, category, desc)
         except Exception as e:
-            print(f'Scotiabank: Error processing message {msg_id}')
-            scotiabank_failed_messages.append(msg_id)
-            traceback.print_exc()
+            print(f'Scotiabank: Error processing message {msg_id}: {e}')
+            are_messages_processed = False
     print('Scotiabank: Updating account process finished')
 
 if __name__ == '__main__':
@@ -87,10 +85,6 @@ if __name__ == '__main__':
     update_bancolombia_account(bancolombia_messages)
     update_scotiabank_account(scotiabank_messages)
 
-    if bancolombia_failed_messages:
-        print(f'Bancolombia: Failed to process {len(bancolombia_failed_messages)} messages: {bancolombia_failed_messages}')
-    if scotiabank_failed_messages:
-        print(f'Scotiabank: Failed to process {len(scotiabank_failed_messages)} messages: {scotiabank_failed_messages}')
-    if bancolombia_failed_messages or scotiabank_failed_messages:
+    if not are_messages_processed:
         raise Exception('Failed to process some messages')
     
