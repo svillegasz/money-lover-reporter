@@ -14,14 +14,14 @@ def process_bancolombia_message(message):
     content = message.text.strip().lower()
     match = re.search(r'(\$[\d,.]+|[\d,.]+ usd)', content)
     amount = re.sub(r'[^\d.]', '', match.group(1))
-    is_expense = has_substr(content, 'compra por') or has_substr(content, 'pago por')
+    is_expense = has_substr(content, 'compra por') or has_substr(content, 'pago por') or has_substr(content, 'pagaste')
     if is_expense:
         if  has_substr(content, 'compra por'):
             print(match.group(1))
             amount = re.sub(r'[^\d,]', '', match.group(1)).replace(',', '.')
         category_type = CATEGORY_TYPE['expense']
-        match = re.search(r'(\d a .+ desde|en .* \d\d:\d\d)', content)
-        desc = re.sub(r'(\d a | desde|en | \d\d:\d\d)', '', match.group(1))
+        match = re.search(r'\d a (.+) (desde|en) .* \d\d:\d\d', content)
+        desc = match.group(1)
         category_name = categorize(desc)
     elif has_substr(content, 'recepcion transferencia') or has_substr(content, 'bancolombia: recibiste'):
         category_type, desc, category_name = (CATEGORY_TYPE['income'], 'Transferencias', 'Others')
