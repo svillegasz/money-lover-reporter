@@ -14,24 +14,23 @@ def process_bancolombia_message(message):
     content = message.text.strip().lower()
     match = re.search(r'(\$[\d,.]+|[\d,.]+ usd)', content)
     amount = re.sub(r'[^\d.]', '', match.group(1))
-    is_expense = has_substr(content, 'compra por') or has_substr(content, 'pago por') or has_substr(content, 'pagaste')
+    is_expense = any(has_substr(content, phrase) for phrase in ['compra por', 'pago por', 'pagaste', 'compraste'])
     if is_expense:
-        if  has_substr(content, 'compra por'):
-            print(match.group(1))
+        if  any(has_substr(content, phrase) for phrase in ['compra por', 'compraste']):
             amount = re.sub(r'[^\d,]', '', match.group(1)).replace(',', '.')
         category_type = CATEGORY_TYPE['expense']
         match = re.search(r'\d a (.+) (desde|en) .* \d\d:\d\d', content)
         desc = match.group(1)
         category_name = categorize(desc)
-    elif has_substr(content, 'recepcion transferencia') or has_substr(content, 'bancolombia: recibiste'):
+    elif any(has_substr(content, phrase) for phrase in ['recepcion transferencia', 'bancolombia: recibiste']):
         category_type, desc, category_name = (CATEGORY_TYPE['income'], 'Transferencias', 'Others')
     else:
-        if  has_substr(content, 'retiro'):
+        if  any(has_substr(content, phrase) for phrase in ['retiro', 'retiraste']):
             amount = re.sub(r'[^\d,]', '', match.group(1)).replace(',', '.')
         category_type = CATEGORY_TYPE['expense']
-        desc, category_name = ('Retiro', 'Withdrawal') if has_substr(content, 'retiro') else ('Transferencia', 'Others')
+        desc, category_name = ('Retiro', 'Withdrawal') if any(has_substr(content, phrase) for phrase in ['retiro', 'retiraste']) else ('Transferencia', 'Others')
 
-    is_visa_expense = is_expense and has_substr(content, 'pagos electronicos s')
+    is_visa_expense = is_expense and any(has_substr(content, phrase) for phrase in ['pagos electronicos s'])
     if is_visa_expense: 
         visa_category_type, visa_category_name = (CATEGORY_TYPE['income'], 'Payment')
     
