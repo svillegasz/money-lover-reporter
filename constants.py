@@ -22,7 +22,7 @@ RECURRING_TRANSACTIONS = [
     },
     {
         'account': BANCOLOMBIA_ACCOUNT,
-        'amount': 268182,
+        'amount': 286692,
         'category': {'type': CATEGORY_TYPE['expense'], 'name': 'Mother'},
         'description': 'Sura PAC',
         'day': 28
