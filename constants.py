@@ -1,4 +1,4 @@
-BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com'
+BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com OR alertasynotificaciones@an.notificacionesbancolombia.com'
 
 SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
 
