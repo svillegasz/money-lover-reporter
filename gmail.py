@@ -38,13 +38,16 @@ def get_message(msg_id, retries=3):
                 # Iterate through the parts to find the text/plain or text/html part
                 for part in msg.walk():
                     if part.get_content_type() == 'text/html':
-                        content = part.get_payload(decode=True).decode(part.get_content_charset()).encode('utf-8')
+                        charset = part.get_content_charset() or 'utf-8'
+                        content = part.get_payload(decode=True).decode(charset, errors='replace').encode('utf-8')
                         break
                 else:
                     # Fallback if no HTML part is found
-                    content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
+                    charset = msg.get_content_charset() or 'utf-8'
+                    content = msg.get_payload(decode=True).decode(charset, errors='replace').encode('utf-8')
             else:
-                content = msg.get_payload(decode=True).decode(msg.get_content_charset()).encode('utf-8')
+                charset = msg.get_content_charset() or 'utf-8'
+                content = msg.get_payload(decode=True).decode(charset, errors='replace').encode('utf-8')
             message = BeautifulSoup(content, 'html.parser')
             return message
         except imaplib.IMAP4.abort as e:

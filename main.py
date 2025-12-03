@@ -20,8 +20,11 @@ def process_bancolombia_message(message):
             amount = re.sub(r'[^\d,]', '', match.group(1)).replace(',', '.')
         category_type = CATEGORY_TYPE['expense']
         match = re.search(r'\d a (.+) (desde|en) .* \d\d:\d\d', content)
-        desc = match.group(1)
-        category_name = categorize(desc)
+        if not match:
+            desc, category_name = ('Others', 'Others')
+        else:
+            desc = match.group(1)
+            category_name = categorize(desc)
     elif any(has_substr(content, phrase) for phrase in ['recepcion transferencia', 'bancolombia: recibiste']):
         category_type, desc, category_name = (CATEGORY_TYPE['income'], 'Transferencias', 'Others')
     else:
@@ -38,9 +41,10 @@ def process_bancolombia_message(message):
 
 def process_scotiabank_message(message):
     print('Scotiabank: processing message')
-    cells = message.select('table table tr:last-child td')
-    desc = nth(cells).string
-    amount = re.sub(r'[^\d.]', '', nth(cells, 1).string)
+    desc_element = message.select('td:contains("Comercio") + td')
+    amount_element = message.select('td:contains("Monto") + td')
+    desc = nth(desc_element).string
+    amount = re.sub(r'[^\d.]', '', nth(amount_element).string)
     category_name = categorize(desc)
     return amount, {'type': CATEGORY_TYPE['expense'], 'name': category_name}, desc
 
