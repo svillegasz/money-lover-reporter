@@ -1,10 +1,10 @@
 BANCOLOMBIA_EMAIL = 'alertasynotificaciones@bancolombia.com.co OR alertasynotificaciones@notificacionesbancolombia.com OR alertasynotificaciones@an.notificacionesbancolombia.com'
 
-SCOTIABANK_EMAIL = 'colpatriainforma@scotiabankcolpatria.com'
+SCOTIABANK_EMAIL = 'DAVIbankInforma@davibank.com'
 
 BANCOLOMBIA_ACCOUNT = 'Bancolombia'
 
-SCOTIABANK_ACCOUNT = 'Scotiabank (Credit Card)'
+SCOTIABANK_ACCOUNT = 'Davibank (Credit Card)'
 
 
 CATEGORY_TYPE = {
