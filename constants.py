@@ -15,28 +15,28 @@ CATEGORY_TYPE = {
 RECURRING_TRANSACTIONS = [
     {
         'account': BANCOLOMBIA_ACCOUNT,
-        'amount': 7100,
+        'amount': 7450,
         'category': {'type': CATEGORY_TYPE['expense'], 'name': 'Fees & Charges'},
         'description': 'Cuota de manejo tarjeta debito',
         'day': 14
     },
     {
         'account': BANCOLOMBIA_ACCOUNT,
-        'amount': 286692,
+        'amount': 297860,
         'category': {'type': CATEGORY_TYPE['expense'], 'name': 'Mother'},
         'description': 'Sura PAC',
         'day': 28
     },
     {
         'account': SCOTIABANK_ACCOUNT,
-        'amount': 5000,
+        'amount': 6290,
         'category': {'type': CATEGORY_TYPE['expense'], 'name': 'Insurances'},
         'description': 'Seguro de vida tarjeta',
         'day': 1
     },
     {
         'account': SCOTIABANK_ACCOUNT,
-        'amount': 95590,
+        'amount': 100761,
         'category': {'type': CATEGORY_TYPE['expense'], 'name': 'Insurances'},
         'description': 'Seguro de vida scotiabank',
         'day': 1
